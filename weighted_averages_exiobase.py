@@ -50,5 +50,10 @@ for i in range (0,48):
 rev_matrix = rev_matrix.replace(0, np.nan)
 
 #median and mean over all columns, should take median; mean ist just calculate for comparing
-rev_median = rev_matrix.median(axis = 1, skipna=True)
-rev_mean = rev_matrix.mean(axis = 1, skipna=True)
+# unit is M.EUR since AV is M.EUR and A is M.EUR/M.EUR
+rev_median = rev_matrix.iloc[:,1:].median(axis = 1, skipna=True)
+rev_mean = rev_matrix.iloc[:,1:].mean(axis = 1, skipna=True)
+
+#save files / yet to run
+rev_median.to_csv('revenue_sectoral_median_exiobase.csv', encoding='utf-8', index=False)
+rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=False)
