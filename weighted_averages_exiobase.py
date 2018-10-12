@@ -14,9 +14,8 @@ del A['sector']
 A.drop(A.index[0])
 A = A.iloc[2:,0:]
 A = A.reset_index(drop=True)
-sumA = sumA.reset_index()
-sumA = sumA.drop(sumA.index[[0]])
-sumA.iloc[:,1] = sumA.iloc[:,1].astype(float)
+A.iloc[:,1:] = A.iloc[:,1:].astype(float)
+sumA = A.iloc[:,1:].sum().reset_index()
 
 
 #F
