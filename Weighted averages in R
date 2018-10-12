@@ -1,0 +1,284 @@
+##READ IN ORIGINAL TEXT FILES AND PREPARE THEM FOR COMPUTATIONS
+#Date: 14.06.2018
+#Helen Droz
+
+data_path <- "C:/Users/HelenDroz/Desktop/CP/Model_Countries/"
+setwd(data_path) 
+
+
+##A
+file_name <- "ixi/A.txt"
+A <- read.table(file_name, skip = 2, header =FALSE, sep ='\t')
+A_cropped <- A
+rm(A)
+A_cropped[,2] <- NULL
+A_cropped[,1] <- NULL
+A <- A_cropped[-1,] #Now we have a 7987 * 7987 matrix (49 countries X  163 industries)
+A <- data.matrix(A)
+save(A, file="ixi/A.Rda") #re write this so the matrix is named A
+
+##Y
+file_name <- "ixi/Y.txt"
+Y <- read.table(file_name, skip = 2, header =FALSE, sep ='\t')
+Y_cropped <- Y
+rm(Y)
+Y_cropped[,2] <- NULL
+Y_cropped[,1] <- NULL
+Y <- Y_cropped[-1,] #Now we have a 7987 * 343 matrix ((49 countries X  163 industries)  X (7 indicators X 49 countries))
+Y <- data.matrix(Y)
+save(Y, file="ixi/Y.Rda") #re write this so the matrix is named Y
+
+
+#####################################################################################################################
+##TotalIn
+## Compute TotalIn (TotalIn=Total Out = Revenues)
+AV <- colSums(Ext[seq(1,9),]) #extract added value from the extensions (first 9 rows are added value)
+sumA <- colSums(A)
+#A = T/TotalIn, TotalIn = sum(T + AV) -> TotalIn = 1/(1-sum(A))
+TotalIn <- AV/ (1-sumA) #Now we have a vector containing to total sales (revenue) of each sector
+save(TotalIn, file="ixi/TotalIn.Rda")
+######################################################################################################################
+
+
+##F - Extension
+file_name <- "F.txt"
+Ext <- read.table(file_name, skip = 2, header =FALSE, sep ='\t')
+Ext[,1] <- NULL
+Ext <- data.matrix(Ext)
+save(Ext, file="ixi/Ext.Rda")
+
+
+#--------------------------------------------
+# COMPUTE CARBON EMISSIONS
+#--------------------------------------------
+#June 2018
+#Helen Droz
+
+rm(list=ls())
+
+#-------------------------------------------
+#SET EXCHANGE RATE
+
+USD_EUR <- 1.39
+
+n_countries <- 49
+n_sectors <- 163
+
+#-------------------------------------------
+#CHOOSE COUNTRY
+country <- 29 #which country perspective do you choose
+country_code <- "USA"
+
+#do not change this
+country_start <- 1+(country-1)*n_sectors
+country_end <- 163 +(country-1)*n_sectors
+#-------------------------------------------
+#READ IN FILES
+
+
+data_path <- "C:/Users/HelenDroz/Desktop/CP/Model_Countries"
+setwd(data_path) 
+
+load("ixi/A.Rda")
+A <- data.matrix(A)
+load("ixi/TotalIn.Rda")
+load("ixi/Ext.Rda")
+
+file_name <- "ixi/CF.txt"
+CF <- read.table(file_name, header =TRUE, sep ='\t')
+
+
+file_name <- "ixi/industries.txt"
+industries <- read.table(file_name, header =TRUE, sep ='\t')
+
+#-----------------------------------------
+#Prepare datasets and compute L
+
+TotalIn[TotalIn<(200/10^6)] <- 0 #in BEL there are some TotalIns which are very small and thus result in a big carbon intensity
+
+T_ <- t(TotalIn * t(A))
+
+diag(A) <- 0
+#is.na(A)<-sapply(A, is.infinite) #set  inf and NA values to zero
+#A[is.na(A)]<-0
+
+i <- dim(A)[1]   #number of sectors
+
+#L <- solve(diag(i) - A) #this takes very long, try again when computer is freshly restated
+load("ixi/L.Rda")
+
+
+#-------------------------------------------
+#SCOPE 1
+
+GWP_scope_1 =(matrix(NA, nrow=1, ncol=1))
+
+
+for (sector_i in seq(country_start,country_end)){
+  
+  k=1
+  for (j in CF$row){
+    
+    Ext_j = Ext[j,]
+    
+    Scope_1_i_temp = Ext_j[sector_i] * CF$CF[k]
+    
+    if (k==1){
+      Scope_1_i=Scope_1_i_temp
+    } else {
+      Scope_1_i = Scope_1_i +Scope_1_i_temp
+    }
+    k=k+1
+  }
+  
+  GWP_scope_1[(sector_i-(country-1)*n_sectors)] = Scope_1_i
+}
+
+#write.table(GWP_scope_1, file=paste0("Outputs/",country_code,"_GWP_scope_1.txt"))
+
+#-------------------------------------------
+#SCOPE 2 & 3up
+
+i=n_sectors #number of sectors
+
+GWP_disagg_scope_2_3 =(matrix(NA, nrow=n_sectors*n_countries, ncol=i))
+
+for (sector_i in seq(country_start,country_end)){
+  
+  demand_i = T_[,sector_i]
+  x_i = L %*% demand_i
+
+  k=1 
+  for (j in CF$row){
+    
+    Ext_j = Ext[j,]
+    
+    DIMs = Ext_j/TotalIn
+    is.na(DIMs)<-sapply(DIMs, is.infinite)
+    DIMs[is.na(DIMs)]<-0
+    DIMs[DIMs<0]<-0
+    
+    emissions = x_i * DIMs
+    GWP_s_i_temp = (emissions)*CF$CF[k] #GWP_s_i = GWP for the sector i
+    
+    if(k==1){
+      GWP_s_i = GWP_s_i_temp
+    } else {
+      GWP_s_i = GWP_s_i + GWP_s_i_temp
+    }
+    
+    k=k+1
+  }
+  
+  GWP_disagg_scope_2_3[,(sector_i-(country-1)*n_sectors)] = t(GWP_s_i)
+
+}
+
+GWP_scope_2_3u = colSums(GWP_disagg_scope_2_3)
+
+#write.table(GWP_scope_2_3u, file=paste0("Outputs/",country_code,"_GWP_scope_2_3u.txt"))
+#write.table(GWP_disagg_scope_2_3, file=paste0("Outputs/",country_code,"_GWP_disagg_scope_2_3.txt"))
+
+#-------------------------------------------
+#SCOPE 2 - so far only electricity of the own country (direct imports are considered scope 3up)
+
+#GWP_scope_2 =(matrix(NA, nrow=1, ncol=1))
+# 
+# el_sectors <- seq(96+(country-1)*n_sectors,107+(country-1)*n_sectors)
+# 
+# CI_el_sectors <- GWP_scope_1[seq(96,107)]/TotalIn[el_sectors]
+# is.na(CI_el_sectors)<-sapply(CI_el_sectors, is.infinite)
+# CI_el_sectors[is.na(CI_el_sectors)]<-0
+# 
+# 
+# for (sector_i in seq(country_start,country_end)){
+#   demand_el_sectors <- T_[el_sectors, sector_i]
+#   GWP_scope_2[(sector_i-(country-1)*n_sectors)] <- sum(demand_el_sectors*CI_el_sectors, na.rm =TRUE)
+#   rm(demand_el_sectors)
+# }
+
+#write.table(GWP_scope_2, file=paste0("Outputs/",country_code,"_GWP_scope_2.txt"))
+
+
+#-------------------------------------------
+#SCOPE 2 - takes also direct imports of electicity from other countries into account
+# - > very small difference
+
+GWP_scope_2 =(matrix(NA, nrow=1, ncol=1))
+
+for (c in seq(1,n_countries)){
+  el_sectors_temp <- seq(96+(c-1)*n_sectors,107+(c-1)*n_sectors)
+  if (c == 1){
+    el_sectors = el_sectors_temp
+  } else {
+    el_sectors = append(el_sectors, el_sectors_temp)
+  }
+  
+}
+
+all_GWP_scope_1 = matrix(NA, nrow=0, ncol=0)
+
+for (sector_i in seq(1,n_countries*n_sectors)){
+  
+  k=1
+  for (j in CF$row){
+    
+    Ext_j = Ext[j,]
+    
+    Scope_1_i_temp = Ext_j[sector_i] * CF$CF[k]
+    
+    if (k==1){
+      all_Scope_1_i=Scope_1_i_temp
+    } else {
+      all_Scope_1_i = all_Scope_1_i +Scope_1_i_temp
+    }
+    k=k+1
+  }
+  
+  all_GWP_scope_1[(sector_i)] = all_Scope_1_i
+}
+
+
+
+CI_el_sectors <- all_GWP_scope_1[el_sectors]/TotalIn[el_sectors]
+is.na(CI_el_sectors)<-sapply(CI_el_sectors, is.infinite)
+CI_el_sectors[is.na(CI_el_sectors)]<-0
+
+
+for (sector_i in seq(country_start,country_end)){
+  demand_el_sectors <- T_[el_sectors, sector_i]
+  GWP_scope_2[(sector_i-(country-1)*n_sectors)] <- sum(demand_el_sectors*CI_el_sectors, na.rm =TRUE)
+  rm(demand_el_sectors)
+}
+
+#write.table(GWP_scope_2, file=paste0("Outputs/",country_code,"_GWP_scope_2.txt"))
+
+#-------------------------------------------
+#SCOPE 3
+
+GWP_scope_3 <- GWP_scope_2_3u - GWP_scope_2
+
+
+#-------------------------------------------
+TotalIn_MEUR <- TotalIn[seq(country_start,country_end)]
+TotalIn_MUSD <- TotalIn[seq(country_start,country_end)] * USD_EUR
+GWP_tot <- GWP_scope_1+GWP_scope_2+GWP_scope_3
+
+Specific_scope_1_t_MUSD <- GWP_scope_1/1000/TotalIn_MUSD
+Specific_scope_2_t_MUSD <- GWP_scope_2/1000/TotalIn_MUSD
+Specific_scope_3_t_MUSD <- GWP_scope_3/1000/TotalIn_MUSD
+Specific_tot_t_MUSD <- GWP_tot/1000/TotalIn_MUSD
+
+
+
+carbon_country <- data.frame(industries$Name,
+                            GWP_scope_1/1000/10^6, GWP_scope_2/1000/10^6, GWP_scope_3/1000/10^6, GWP_tot/1000/10^6,
+                            TotalIn_MEUR, TotalIn_MUSD,
+                            Specific_scope_1_t_MUSD, Specific_scope_2_t_MUSD, Specific_scope_3_t_MUSD, Specific_tot_t_MUSD, 
+                            stringsAsFactors=FALSE)
+
+names(carbon_country) <- c("Sector","Scope_1_Mt", "Scope_2_Mt", "Scope_3up_Mt", "Tot_Mt",
+                          "Revenue_MEUR", "Revenue_MUSD",
+                          "Specific_1_t_MUSD", "Specific_2_t_MUSD", "Specific_3up_t_MUSD", "Specific_tot_t_MUSD")
+
+write.table(carbon_country, file=paste0("Outputs/",country_code,"_carbon_country.txt"))
