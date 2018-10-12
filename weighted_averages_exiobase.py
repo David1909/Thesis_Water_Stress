@@ -6,7 +6,7 @@ import numpy as np
 #loading data
 #A
 # A shows how much a sector buys from another to create one euro of rev (value purchased / value rev)
-# and another stupid comment
+# deleted this comment
 doc = codecs.open('A.txt','rU')
 A = pd.read_csv(doc, sep='\t')
 A.rename(columns=A.iloc[0,:],inplace=True)
