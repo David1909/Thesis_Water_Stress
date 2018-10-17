@@ -57,3 +57,11 @@ rev_mean = rev_matrix.iloc[:,1:].mean(axis = 1, skipna=True)
 #save files / yet to run
 rev_median.to_csv('revenue_sectoral_median_exiobase.csv', encoding='utf-8', index=False)
 rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=False)
+
+##################################################################################################
+#the exiobase sector averages were assigend a Sector by hand in EXCEL
+#in the first step, the sectors were CD sector system plus some additional
+###############################################################################################
+
+sec_rev_int = pd.read_csv('EXIOBASE_rev_and_intensities_with_sectorcode.csv', error_bad_lines=False, encoding='ISO-8859-1')
+weighted_avg = sec_rev_int.groupby(['Sector Code']).apply(lambda x: np.average(x['m3/EUR'], weights=x['median revenue in M.EUR']))
