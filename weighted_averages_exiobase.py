@@ -61,6 +61,7 @@ rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=Fa
 ##################################################################################################
 #the exiobase sector averages were assigend a Sector by hand in EXCEL
 #in the first step, the sectors were CD sector system plus some additional
+#the wighted average is calculated using the median revenue of a sector
 ###############################################################################################
 
 sec_rev_int = pd.read_csv('EXIOBASE_rev_and_intensities_with_sectorcode.csv', error_bad_lines=False, encoding='ISO-8859-1')
