@@ -31,7 +31,7 @@ AV.iloc[0:,0:]=AV.iloc[0:,0:].astype(float)
 AV = AV.sum().reset_index() # results in a 7987 rows df (49 countries x 163 industries)
 
 ###############################################################################
-#calculating Total Output
+#calculating Total revenue per sector
 ###############################################################################
 
 rev = sumA.copy().reset_index(drop=True)
@@ -60,8 +60,45 @@ rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=Fa
 
 ##################################################################################################
 #the exiobase sector averages were assigend a Sector by hand in EXCEL
-#in the first step, the sectors were CD sector system plus some additional
+# !!!!!!!!!!!!!!in the first step, the sectors were CD sector system plus some additional !!!!!!!!
+#TO DO: only do this with CD sectors
 ###############################################################################################
 
 sec_rev_int = pd.read_csv('EXIOBASE_rev_and_intensities_with_sectorcode.csv', error_bad_lines=False, encoding='ISO-8859-1')
 weighted_avg = sec_rev_int.groupby(['Sector Code']).apply(lambda x: np.average(x['m3/EUR'], weights=x['median revenue in M.EUR']))
+
+
+##################################################################
+#write subroutine to create damage function
+#first step: function to match the intensity with a maximum exposure value
+#second step
+######################################################
+
+#max_exposure is the table generated from the water intensities
+max_exposure = weighted_avg.copy()
+#for a linear relation between maximum exposure and intensity
+for i in range(0,weighted_avg.shape[0]):
+    max_exposure[i] = weighted_avg[i] / max(weighted_avg)
+
+
+# s-shape funktion to calculate exposure factor
+#copied from Sam
+#Vhalf is the the point of the function where half of the damage possible is caused (Wendepunkt) here between 0.4 and 1.0 -> 0.7
+#vThreshold is the threshold when damage apprears (here from 0.4 on)
+
+def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
+    vTemp = ((wri - vThreshold) / (vHalf - vThreshold))
+    vTemp[vTemp < 0] = 0
+    exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
+    return exp
+
+# imp_fun.plot();
+
+max_exposure = weighted_avg.copy()
+min_max_scaler = preprocessing.MinMaxScaler()
+
+max_exposure = weighted_avg
+
+max(weighted_avg)
+
+weighted_avg.count(cow)
