@@ -84,11 +84,14 @@ for i in range(0,weighted_avg.shape[0]):
 # s-shape funktion to calculate exposure factor
 #copied from Sam
 #Vhalf is the the point of the function where half of the damage possible is caused (Wendepunkt) here between 0.4 and 1.0 -> 0.7
-#vThreshold is the threshold when damage apprears (here from 0.4 on)
+#vThreshold is the threshold below which no damage ocuurs (here from 0.4 on)
+#once wri exceeds vThreshold, vTemp gets positive
+#what is scale?
 
 def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
     vTemp = ((wri - vThreshold) / (vHalf - vThreshold))
-    vTemp[vTemp < 0] = 0
+    if vTemp < 0: # is that effective?
+        vTemp = 0
     exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
     return exp
 
