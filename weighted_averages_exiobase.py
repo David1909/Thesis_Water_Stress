@@ -2,6 +2,7 @@
 import pandas as pd
 import codecs
 import numpy as np
+from osgeo import ogr
 
 #loading data
 #A
@@ -95,9 +96,34 @@ def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
     exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
     return exp
 
+
+#load location and sectoral revenue database
+company_data = pd.read_csv('locations_rev_sector_msci.csv', error_bad_lines=False, encoding='ISO-8859-1')
+
+#load shapefile with layer BWS (package shapefile)
+sf = ogr.Open("aqueduct_global_dl_20150409.shp")
+layer = sf.GetLayerByName("aqueduct_global_dl_20150409")
+
+# Location for Pizzeria Gusto Italy: LAT:49.873626 N, LONG:-97.183495 E (Canada)
+#woori bank china: 22.5347431 N, 114.0220717 E
+# note: syntax for POINT is POINT(LONG LAT)
+
+for i in range(0, len(company_data['longitude'])):
+    long = company_data.loc[i,'longitude']
+    lat = company_data.loc[i,'latitude']
+    point = ogr.CreateGeometryFromWkt("POINT(long lat)")
+    for feature in layer:
+        if feature.GetGeometryRef().Contains(point):
+            BWS = feature.GetField("BWS")
+        else:
+            BWS = '0'
+
+
+#GetField gets the data of a column. Here 9 is for BWS
+
 # imp_fun.plot();
 
-max_exposure = weighted_avg.copy()
+
 min_max_scaler = preprocessing.MinMaxScaler()
 
 max_exposure = weighted_avg
