@@ -3,6 +3,9 @@ import pandas as pd
 import codecs
 import numpy as np
 from osgeo import ogr
+import shapely
+from shapely.geometry import Point
+import time
 
 #loading data
 #A
@@ -103,25 +106,46 @@ company_data = pd.read_csv('locations_rev_sector_msci.csv', error_bad_lines=Fals
 #load shapefile with layer BWS (package shapefile)
 sf = ogr.Open("aqueduct_global_dl_20150409.shp")
 layer = sf.GetLayerByName("aqueduct_global_dl_20150409")
+spatialref = layer.GetSpatialRef()
 
+company_data1 = company_data.iloc[:10,:].copy()
+company_data1['BWS'] = np.nan
 # Location for Pizzeria Gusto Italy: LAT:49.873626 N, LONG:-97.183495 E (Canada)
-#woori bank china: 22.5347431 N, 114.0220717 E
+# woori bank china: 22.5347431 N, 114.0220717 E
 # note: syntax for POINT is POINT(LONG LAT)
 
-for i in range(0, len(company_data['longitude'])):
-    long = company_data.loc[i,'longitude']
-    lat = company_data.loc[i,'latitude']
-    point = ogr.CreateGeometryFromWkt("POINT(long lat)")
+for i in range(0, 10):
+    long = company_data.loc[i, 'longitude']
+    lat = company_data.loc[i, 'latitude']
+    point = shapely.geometry.Point(long, lat)
+    point = ogr.CreateGeometryFromWkt(str(point))
     for feature in layer:
         if feature.GetGeometryRef().Contains(point):
-            BWS = feature.GetField("BWS")
-        else:
-            BWS = '0'
-
+            company_data1.loc[i,'BWS'] = feature.GetField("BWS")
+            break
+    layer.ResetReading()
 
 #GetField gets the data of a column. Here 9 is for BWS
 
 # imp_fun.plot();
+
+#check time of a process############################################################################################
+start = time.time()
+long = company_data.loc[10, 'longitude']
+lat = company_data.loc[10, 'latitude']
+point = shapely.geometry.Point(long, lat)
+point = ogr.CreateGeometryFromWkt(str(point))
+for feature in layer:
+    if feature.GetGeometryRef().Contains(point):
+        BWS = feature.GetField("BWS")
+        print(feature.GetField("BWS"))
+        break
+layer.ResetReading()
+
+end = time.time()
+print(end - start)
+####################################################################################################################
+
 
 
 min_max_scaler = preprocessing.MinMaxScaler()
