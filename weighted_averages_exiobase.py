@@ -108,13 +108,13 @@ sf = ogr.Open("aqueduct_global_dl_20150409.shp")
 layer = sf.GetLayerByName("aqueduct_global_dl_20150409")
 spatialref = layer.GetSpatialRef()
 
-company_data1 = company_data.iloc[:10,:].copy()
+company_data1 = company_data.copy()
 company_data1['BWS'] = np.nan
 # Location for Pizzeria Gusto Italy: LAT:49.873626 N, LONG:-97.183495 E (Canada)
 # woori bank china: 22.5347431 N, 114.0220717 E
 # note: syntax for POINT is POINT(LONG LAT)
 
-for i in range(0, 10):
+for i in range(0, len(company_data['latitude'])):
     long = company_data.loc[i, 'longitude']
     lat = company_data.loc[i, 'latitude']
     point = shapely.geometry.Point(long, lat)
@@ -125,9 +125,12 @@ for i in range(0, 10):
             break
     layer.ResetReading()
 
+company_data1.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_BWS.csv', encoding='utf-8', index=False)
+
+#check the percentage of outliers (nan values)
+(company_data['BWS'].isna().sum())/len(company_data['latitude'])
 #GetField gets the data of a column. Here 9 is for BWS
 
-# imp_fun.plot();
 
 #check time of a process############################################################################################
 start = time.time()
