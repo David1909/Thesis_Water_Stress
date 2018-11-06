@@ -7,7 +7,51 @@ import shapely
 from shapely.geometry import Point
 import time
 
-#loading data
+#############################################################################
+###########          computing average water intensities        #############
+#############################################################################
+
+#read consumption and withdrawal data
+withdrawals = pd.read_csv('exiobase_withdrawals2.csv', error_bad_lines=False, encoding='ISO-8859-1', delimiter=';', dtype=float)
+consumption = pd.read_csv('exiobase_consumption2.csv', error_bad_lines=False, encoding='ISO-8859-1', dtype=float, delimiter=';')
+#consumption = pd.read_csv('exiobase_consumption.csv', error_bad_lines=False, encoding='ISO-8859-1', dtype=float)
+
+#sum water intensities for every country and every sector
+sum_withdrawals = withdrawals.sum(0)
+sum_consumption = consumption.sum(0)
+
+#replace withdrawals if smaller than consumption
+combined_df = sum_withdrawals.copy()
+for i in range(0,len(combined_df)):
+    if sum_consumption.iat[i] > combined_df.iat[i]:
+        combined_df.iat[i] = sum_consumption.iat[i]
+
+#replace zeros with NaN
+combined_df = combined_df.replace(0, np.nan)
+
+#create a table with coutry x sector
+# cutting the Series in 48 rows and 163 columns
+index = range(0,48)
+col_names = list(withdrawals.columns.values)
+col_names = col_names[0:163]
+data = np.array([np.arange(48)]*163).T
+new_df = pd.DataFrame(np.nan, index=index, columns=col_names)
+
+for i in range(0,48):
+    for k in range(0,163):
+        new_df.iloc[i,k] = combined_df.iat[k + (163 * i)]
+
+#calculate sectoral water intensities by taking the median or mean for every sector
+median_sector_water_intensities = new_df.median(skipna=True)
+mean_sector_water_intensities = new_df.mean(skipna=True)
+
+
+
+#############################################################################
+###########          computing weights for weighted averages    #############
+#############################################################################
+
+#loading economic data
 #A
 # A shows how much a sector buys from another to create one euro of rev (value purchased / value rev)
 # deleted this comment
@@ -21,7 +65,6 @@ A = A.reset_index(drop=True)
 A.iloc[:,1:] = A.iloc[:,1:].astype(float)
 sumA = A.iloc[:,1:].sum().reset_index()
 
-
 #F
 #
 doc = codecs.open('F.txt','rU')
@@ -31,12 +74,10 @@ F.rename(columns=F.iloc[0,:],inplace=True)
 #extracting added value (AV) from table F
 AV = F.iloc[1:10,:]
 del AV['sector']
-AV.iloc[0:,0:]=AV.iloc[0:,0:].astype(float)
+AV=AV.astype(float)
 AV = AV.sum().reset_index() # results in a 7987 rows df (49 countries x 163 industries)
 
-###############################################################################
 #calculating Total revenue per sector
-###############################################################################
 
 rev = sumA.copy().reset_index(drop=True)
 #Create table
@@ -61,6 +102,15 @@ rev_mean = rev_matrix.iloc[:,1:].mean(axis = 1, skipna=True)
 #save files / yet to run
 rev_median.to_csv('revenue_sectoral_median_exiobase.csv', encoding='utf-8', index=False)
 rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=False)
+
+#############################################################################
+###########          combine revenue and water intensities    ###############
+#############################################################################
+
+rev_and_int = pd.DataFrame(data=median_sector_water_intensities)
+rev_and_int = rev_and_int.assign(revenue=rev_median.values)
+#print csv:
+rev_and_int.to_csv('median_revenue_and_median_intensities_exiobase.csv', encoding='utf-8', index=False)
 
 ##################################################################################################
 #the exiobase sector averages were assigend a Sector by hand in EXCEL
@@ -99,6 +149,9 @@ def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
     exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
     return exp
 
+#############################################################################
+###########          writing programm to read location data    ##############
+#############################################################################
 
 #load location and sectoral revenue database
 company_data = pd.read_csv('locations_rev_sector_msci.csv', error_bad_lines=False, encoding='ISO-8859-1')
