@@ -110,7 +110,7 @@ rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=Fa
 rev_and_int = pd.DataFrame(data=median_sector_water_intensities)
 rev_and_int = rev_and_int.assign(revenue=rev_median.values)
 #print csv:
-rev_and_int.to_csv('median_revenue_and_median_intensities_exiobase.csv', encoding='utf-8', index=False)
+rev_and_int.to_csv('median_revenue_and_median_intensities_exiobase.csv', encoding='utf-8', index=True)
 
 ##################################################################################################
 #the exiobase sector averages were assigend a Sector by hand in EXCEL

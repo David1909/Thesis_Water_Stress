@@ -1,0 +1,164 @@
+,0,revenue
+Cultivation of paddy rice,2.492401042,411.3809154589192
+Cultivation of wheat,2.19488599278,817.1684568569317
+Cultivation of cereal grains nec,2.33180644584,959.9841087389511
+"Cultivation of vegetables, fruit, nuts",0.34046284140000005,4907.315925228177
+Cultivation of oil seeds,2.066953016,510.62112952487246
+"Cultivation of sugar cane, sugar beet",1.6006573350000002,128.7630080971957
+Cultivation of plant-based fibers,0.8023407592533852,23.60266488886385
+Cultivation of crops nec,1.9333338877700004,163.03917807095797
+Cattle farming,0.07728309582350001,1151.6538206838381
+Pigs farming,0.014314868000000001,1061.8218802701365
+Poultry farming,0.004485887500000001,1164.342886406947
+Meat animals nec,0.013271263799999999,149.3395168584966
+Animal products nec,0.0050044741000000005,64.55478151154107
+Raw milk,0.0063169062,1975.3095268210595
+"Wool, silk-worm cocoons",0.007456479748830601,5.022244847217657
+"Manure treatment (conventional), storage and land application",,0.021191233486185
+"Manure treatment (biogas), storage and land application",,0.021191233486185
+"Forestry, logging and related service activities",0.006903692172317927,932.961327333291
+"Fishing, operating of fish hatcheries and fish farms; service activities incidental to fishing",0.000760248181381518,551.9465426986824
+Mining of coal and lignite; extraction of peat,0.000216081331,227.66751007691403
+"Extraction of crude petroleum and services related to crude oil extraction, excluding surveying",0.000285953175,1427.2724307578453
+"Extraction of natural gas and services related to natural gas extraction, excluding surveying",0.00044279149999999995,687.913566584323
+"Extraction, liquefaction, and regasification of other petroleum and gaseous materials",0.0004829735,2.9486903007254943
+Mining of uranium and thorium ores,0.00043191748999999997,10.47248157570702
+Mining of iron ores,0.0004756728996931199,106.39733993799321
+Mining of copper ores and concentrates,0.00051189100264,278.26275179873767
+Mining of nickel ores and concentrates,0.0002539386215,5.970223280764865
+Mining of aluminium ores and concentrates,0.00046685863796076604,1.7340382541464998
+Mining of precious metal ores and concentrates,0.0030730269155000004,135.46982564205038
+"Mining of lead, zinc and tin ores and concentrates",0.00045660624489999994,158.03118855386998
+Mining of other non-ferrous metal ores and concentrates,0.0003069802925,39.65211819056783
+Quarrying of stone,0.000400923942,729.3636103642395
+Quarrying of sand and clay,0.0003039525,1495.1180196811517
+"Mining of chemical and fertilizer minerals, production of salt, other mining and quarrying n.e.c.",0.00045268,210.2156268139306
+Processing of meat cattle,0.007846941674999998,1276.7478158157257
+Processing of meat pigs,0.0076640239,1258.582777460071
+Processing of meat poultry,0.008189769038788,1217.0753309356292
+Production of meat products nec,0.002603810702362,302.25846964889934
+Processing vegetable oils and fats,0.00756737743,319.481818796113
+Processing of dairy products,0.0055837165000000005,3243.2266805738664
+Processed rice,0.010214928,115.52853407184051
+Sugar refining,0.0132837497005,255.25195175738293
+Processing of Food products nec,0.005584979537499998,12596.416013574548
+Manufacture of beverages,0.008034619738905,3234.8170207630274
+Manufacture of fish products,0.0037195306135739993,1272.999949161869
+Manufacture of tobacco products,0.001187542,1322.2471327105193
+Manufacture of textiles,0.01035692965,3467.317180226766
+Manufacture of wearing apparel; dressing and dyeing of fur,0.00365363207695,2934.934892313003
+"Tanning and dressing of leather; manufacture of luggage, handbags, saddlery, harness and footwear",0.0052526579999999995,1160.4163898021486
+"Manufacture of wood and of products of wood and cork, except furniture; manufacture of articles of straw and plaiting materials",0.0004297792002,3423.6913899511264
+Re-processing of secondary wood material into new wood material,0.00031996999999999993,797.2365988283772
+Pulp,0.025428242108119996,309.8751646494193
+Re-processing of secondary paper into new pulp,0.0262671127972,409.17755999273976
+Paper,0.03652515770999999,4408.640198433095
+"Publishing, printing and reproduction of recorded media",0.001822436161,6747.440913150684
+Manufacture of coke oven products,0.001642026455,206.85973546886277
+Petroleum Refinery,0.0007043011904294999,14133.300675659031
+Processing of nuclear fuel,0.00076435,23.633942572971357
+"Plastics, basic",0.014218721542078,2709.3695386327736
+Re-processing of secondary plastic into new plastic,0.01588582244999999,276.11679233236316
+N-fertiliser,1.6861608967500001,30.492798264550355
+P- and other fertiliser,0.05365016844955,396.5306384456779
+Chemicals nec,0.00883865179325,8550.377493735592
+Manufacture of rubber and plastic products,0.004497188768500001,7117.350573681546
+Manufacture of glass and glass products,0.0033244947199999996,1115.9177563108767
+Re-processing of secondary glass into new glass,0.003101133,161.59475205799083
+Manufacture of ceramic goods,0.0026525085882000005,511.764498603647
+"Manufacture of bricks, tiles and construction products, in baked clay",0.0111379823843,223.79262130503494
+"Manufacture of cement, lime and plaster",0.014698894846500003,2366.8152535340114
+Re-processing of ash into clinker,0.012412627,171.3641849108125
+Manufacture of other non-metallic mineral products n.e.c.,0.00285325482055,1199.3153930048065
+Manufacture of basic iron and steel and of ferro-alloys and first products thereof,0.018079832709999997,3552.3468733675954
+Re-processing of secondary steel into new steel,0.022900779,2759.9712260947963
+Precious metals production,0.00040157982249999996,496.6288522426729
+Re-processing of secondary preciuos metals into new preciuos metals,0.0008289225199500001,0.7746684409289676
+Aluminium production,0.00683193585,1062.6703799628337
+Re-processing of secondary aluminium into new aluminium,0.00683193935,722.3203591850856
+"Lead, zinc and tin production",0.006148303403999999,451.04243449623766
+Re-processing of secondary lead into new lead,0.006006422059999999,91.13028394196799
+Copper production,0.0033223402999999997,1787.1206571161656
+Re-processing of secondary copper into new copper,0.004747991229999998,36.388685670456745
+Other non-ferrous metal production,0.001972800725,189.2164886471008
+Re-processing of secondary other non-ferrous metals into new other non-ferrous metals,0.0079239735,2.3770148956702224
+Casting of metals,0.0008705061,1204.996600522077
+"Manufacture of fabricated metal products, except machinery and equipment",0.00575255257993,13656.827044796113
+Manufacture of machinery and equipment n.e.c.,0.0015760069684399997,14194.411566534458
+Manufacture of office machinery and computers,0.00047937062294044897,1246.701048953513
+Manufacture of electrical machinery and apparatus n.e.c.,0.0015171046898999998,9582.127781251642
+"Manufacture of radio, television and communication equipment and apparatus",0.0005889769365,5876.160710992788
+"Manufacture of medical, precision and optical instruments, watches and clocks",0.0006047951494499999,4844.51813603884
+"Manufacture of motor vehicles, trailers and semi-trailers",0.0019115756528,17530.648673561464
+Manufacture of other transport equipment,0.00212420649,4189.342215314616
+Manufacture of furniture; manufacturing n.e.c.,0.00281121979433645,5823.547572083322
+Recycling of waste and scrap,0.0027528223659999997,623.6977541990991
+Recycling of bottles by direct reuse,0.00908327292,276.4826529498909
+Production of electricity by coal,0.22488972370913574,909.8326908490751
+Production of electricity by gas,0.0539071485,978.9787459492646
+Production of electricity by nuclear,1.5370439079,862.9550526516653
+Production of electricity by hydro,1.7997236546300008e-05,447.66327424812476
+Production of electricity by wind,1.4621e-05,75.85019263894
+Production of electricity by petroleum and other oil derivatives,0.030032447370000003,101.14932655461949
+Production of electricity by biomass and waste,0.0027275574429364005,90.27321213555336
+Production of electricity by solar photovoltaic,5.1310000000000005e-06,19.359760037935533
+Production of electricity by solar thermal,0.198887051,0.0010744876271553
+"Production of electricity by tide, wave, ocean",,0.0007211809899106999
+Production of electricity by Geothermal,0.078384968,30.35853892359389
+Production of electricity nec,2.4206059e-05,49.62623891429681
+Transmission of electricity,2.300678e-05,800.4792217710547
+Distribution and trade of electricity,3.2321931e-05,2336.2866891864583
+Manufacture of gas; distribution of gaseous fuels through mains,1.9598734e-05,1190.7932384841333
+Steam and hot water supply,0.00015497980000000002,214.58030950737992
+"Collection, purification and distribution of water",0.0005747077000000001,234.08704479291004
+Construction,0.00016320509625,56728.647174218044
+Re-processing of secondary construction material into aggregates,0.0001524516,133.84569630345234
+"Sale, maintenance, repair of motor vehicles, motor vehicles parts, motorcycles, motor cycles parts and accessoiries",4.005093579e-05,7284.863296617181
+Retail sale of automotive fuel,5.2095340000000005e-05,568.7075055871463
+"Wholesale trade and commission trade, except of motor vehicles and motorcycles",0.0005389419429359999,26482.166446784024
+"Retail trade, except of motor vehicles and motorcycles; repair of personal and household goods",0.00014542071307352219,14244.014090612342
+Hotels and restaurants,2.814551273199999e-05,21999.36149966514
+Transport via railways,6.554894469999997e-05,4003.868413074524
+Other land transport,5.849424450000001e-05,15480.104656280197
+Transport via pipelines,8.281668715e-05,642.2961568503904
+Sea and coastal water transport,2.28248405e-05,4501.259399308164
+Inland water transport,1.756657583029e-05,212.83234891465878
+Air transport,2.36e-05,5254.9049071746085
+Supporting and auxiliary transport activities; activities of travel agencies,1.00755717315e-05,13057.443038648093
+Post and telecommunications,3.51637e-06,19797.17255347383
+"Financial intermediation, except insurance and pension funding",8.55020626914e-07,19437.209854189674
+"Insurance and pension funding, except compulsory social security",4.788300000000001e-07,7859.9218916605005
+Activities auxiliary to financial intermediation,2.7914360000000006e-06,5340.786427703087
+Real estate activities,5.9993173239099986e-06,33919.786244146526
+Renting of machinery and equipment without operator and of personal and household goods,2.11995e-05,3602.780554890438
+Computer and related activities,5.387e-06,7832.278435448721
+Research and development,0.00036880056719999993,2433.73485645659
+Other business activities,2.4523999999999998e-05,28768.833373319445
+Public administration and defence; compulsory social security,0.0004412903763800001,30892.14838103002
+Education,1.5583086177059998e-05,23735.764538659947
+Health and social work,1.32603377657e-05,34931.921600032074
+Incineration of waste: Food,0.00386924,179.69884152147782
+Incineration of waste: Paper,0.002817532,185.0262588503409
+Incineration of waste: Plastic,0.0012161020525,135.61384618992676
+Incineration of waste: Metals and Inert materials,0.0015173566324,216.53583529060194
+Incineration of waste: Textiles,0.0026148870000000006,71.29431590251613
+Incineration of waste: Wood,0.00251691583,92.12087880278247
+Incineration of waste: Oil/Hazardous waste,0.002783475225,123.66076015044993
+"Biogasification of food waste, incl. land application",0.00010913626999999998,67.58928160122994
+"Biogasification of paper, incl. land application",0.00011945093500000001,25.155453101964778
+"Biogasification of sewage slugde, incl. land application",0.00043444218000000004,193.66895645996837
+"Composting of food waste, incl. land application",0.00067489925,209.01953893321684
+"Composting of paper and wood, incl. land application",0.00135399173703,6.753810744877728
+"Waste water treatment, food",0.00029362752999999997,161.52725662286824
+"Waste water treatment, other",0.00029134796000000003,285.2674231996496
+Landfill of waste: Food,0.0020822710508,231.8773502183699
+Landfill of waste: Paper,0.0020822699707999997,173.7115201929824
+Landfill of waste: Plastic,0.0020832725708,36.302652363465356
+Landfill of waste: Inert/metal/hazardous,0.0020853021708,274.63949191080064
+Landfill of waste: Textiles,0.0020819803707999994,46.354904478090965
+Landfill of waste: Wood,0.002082175170799999,51.81294965311447
+Activities of membership organisation n.e.c.,0.00015765161,5016.277548900174
+"Recreational, cultural and sporting activities",1.9699999999999998e-05,9149.42012374946
+Other service activities,5.384582e-05,2812.5168215007225
+Private households with employed persons,0.0007093014,1895.2037287797666
+Extra-territorial organizations and bodies,,0.046896138075719386
