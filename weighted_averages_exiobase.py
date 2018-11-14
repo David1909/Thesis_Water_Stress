@@ -118,9 +118,9 @@ rev_and_int.to_csv('median_revenue_and_median_intensities_exiobase.csv', encodin
 #the wighted average is calculated using the median revenue of a sector
 ###############################################################################################
 
-sec_rev_int = pd.read_csv('EXIOBASE_rev_and_intensities_with_sectorcode.csv', error_bad_lines=False, encoding='ISO-8859-1')
-weighted_avg = sec_rev_int.groupby(['Sector Code']).apply(lambda x: np.average(x['m3/EUR'], weights=x['median revenue in M.EUR']))
-
+sec_rev_int = pd.read_csv('Mapping_median_revenue_and_median_intensities_exiobase.csv', error_bad_lines=False, encoding='ISO-8859-1')
+weighted_avg = sec_rev_int.groupby(['Water Risk Sector']).apply(lambda x: np.average(x['water intensity (M3/EUR)'], weights=x['revenue (M.EUR)']))
+weighted_avg.to_csv('Water_Risk_Sectors_intensities.csv', encoding='utf-8', index=False)
 
 ##################################################################
 #write subroutine to create damage function
