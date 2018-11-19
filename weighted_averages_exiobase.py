@@ -152,6 +152,7 @@ def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
 
 #############################################################################
 ###########          writing programm to read location data    ##############
+###########                 CURRENT DATA                       #############
 #############################################################################
 
 #load location and sectoral revenue database
@@ -185,6 +186,53 @@ company_data1.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/M
 (company_data['BWS'].isna().sum())/len(company_data['latitude'])
 #GetField gets the data of a column. Here 9 is for BWS
 
+#############################################################################
+###########          writing programm to read location data    ##############
+###########                 future projections                 ##############
+#############################################################################
+
+#load shapefile with layer BWS (package shapefile)
+sf = ogr.Open("C:/Users/bod/Desktop/aqueduct_projections_20150309_shp/aqueduct_projections_20150309.shp")
+layer = sf.GetLayerByName("aqueduct_projections_20150309")
+spatialref = layer.GetSpatialRef()
+
+#loading data
+MSCI_locations = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_BWS.csv', encoding='utf-8')
+
+#BWS for business as usual
+MSCI_locations['BWS 2020'] = np.nan
+MSCI_locations['BWS 2030'] = np.nan
+MSCI_locations['BWS 2040'] = np.nan
+
+#rows for pessimistic scenarios
+MSCI_locations['BWS 2020 pes'] = np.nan
+MSCI_locations['BWS 2030 pes'] = np.nan
+MSCI_locations['BWS 2040 pes'] = np.nan
+
+#rows for optimistic scenario
+MSCI_locations['BWS 2020 opt'] = np.nan
+MSCI_locations['BWS 2030 opt'] = np.nan
+MSCI_locations['BWS 2040 opt'] = np.nan
+
+#for loop extracting water stress values for 2020, 2030, 2040
+for i in range(0, 20):
+    long = MSCI_locations.loc[i, 'longitude']
+    lat = MSCI_locations.loc[i, 'latitude']
+    point = shapely.geometry.Point(long, lat)
+    point = ogr.CreateGeometryFromWkt(str(point))
+    for feature in layer:
+        if feature.GetGeometryRef().Contains(point):
+            MSCI_locations.loc[i, 'BWS 2020'] = feature.GetField("ws2028tr")
+            MSCI_locations.loc[i, 'BWS 2030'] = feature.GetField("ws3028tr")
+            MSCI_locations.loc[i, 'BWS 2040'] = feature.GetField("ws4028tr")
+            MSCI_locations.loc[i, 'BWS 2020 pes'] = feature.GetField("ws2038tr")
+            MSCI_locations.loc[i, 'BWS 2030 pes'] = feature.GetField("ws3038tr")
+            MSCI_locations.loc[i, 'BWS 2040 pes'] = feature.GetField("ws4038tr")
+            MSCI_locations.loc[i, 'BWS 2020 opt'] = feature.GetField("ws2024tr")
+            MSCI_locations.loc[i, 'BWS 2030 opt'] = feature.GetField("ws3024tr")
+            MSCI_locations.loc[i, 'BWS 2040 opt'] = feature.GetField("ws4024tr")
+            break
+    layer.ResetReading()
 
 #check time of a process############################################################################################
 start = time.time()
