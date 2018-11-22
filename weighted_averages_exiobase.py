@@ -251,12 +251,29 @@ end = time.time()
 print(end - start)
 ####################################################################################################################
 
+#try to merge location data with revenue data
+
+locations = pd.read_csv('locations_rev_sector_msci.csv', error_bad_lines=False, encoding='ISO-8859-1')
+locations = locations.iloc[:,0:5].copy()
+total_revenue = pd.read_csv('export_rev_water_risk_big.csv', error_bad_lines=False, encoding='ISO-8859-1')
+new_df = locations.merge(total_revenue, on='ISIN')
+
+# get number of locations for dividing revenue by number of locations
+location_number = new_df.groupby('ISIN').count()
+location_number = location_number['latitude']
+
+#create dictionary for ISINs and map dictionary to the df as new column
+isin_dict = location_number.to_dict()
+new_df['number of locations'] = new_df['ISIN'].map(isin_dict)
+
+#loop divides revenues by number of locations
+for i in range(0,len(new_df)):
+    for k in range(7, (len(new_df.columns)-1)):
+        new_df.iloc[i,k] = new_df.iloc[i,k] / new_df.iloc[i,41]
 
 
-min_max_scaler = preprocessing.MinMaxScaler()
 
-max_exposure = weighted_avg
+def revenue_fractions (new_df):
+    if new_df. != 'nan':
 
-max(weighted_avg)
-
-weighted_avg.count(cow)
+#a simple division by the total number of all locations isnt possiblie since
