@@ -6,8 +6,11 @@ from osgeo import ogr
 import shapely
 from shapely.geometry import Point
 import time
+import math
 from scipy.stats import spearmanr
 from scipy.stats.stats import pearsonr
+import matplotlib
+import matplotlib.pyplot as plt
 
 #############################################################################
 ###########          computing average water intensities        #############
@@ -243,6 +246,10 @@ location_rev['BWS'].isna().sum()/len(location_rev['latitude'])
 ###########          WATER FOOTPRINTS                          ##############
 #############################################################################
 
+
+#location_rev = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_rev_fractions.csv', encoding='utf-8')
+#wss_water_intensities= pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8')
+
 wss_water_intensities = wss_water_intensities.set_index([0])
 wss_water_intensities = pd.Series(wss_water_intensities.iloc[:,0])
 water_intensities_dict = wss_water_intensities.to_dict()
@@ -304,15 +311,19 @@ spearmanr(MSCI_water_footprint_per_isin.iloc[:,2], MSCI_water_footprint_per_isin
 #pearson
 pearsonr(MSCI_water_footprint_per_isin.iloc[:,2], MSCI_water_footprint_per_isin['reuters footprints'])
 
+#standard deviation
+stddev = math.sqrt(sum((MSCI_water_footprint_per_isin.iloc[:,2] - MSCI_water_footprint_per_isin['reuters footprints'])**2)/len(MSCI_water_footprint_per_isin))
+
 #Histogram
-MSCI_water_footprint_per_isin['difference'] = MSCI_water_footprint_per_isin['reuters footprints'] - MSCI_water_footprint_per_isin.iloc[:,2]
+MSCI_water_footprint_per_isin['difference'] = MSCI_water_footprint_per_isin.iloc[:,2] - MSCI_water_footprint_per_isin['reuters footprints']
 difference = MSCI_water_footprint_per_isin['difference'].tolist()
-min(difference)
-max(difference)
-plt.hist(difference, bins=100, histtype='bar', rwidth=0.8)
-plt.xlabel('x')
-plt.ylabel('y')
-plt.title('intetesting graph')
+conf60 = st.t.interval(0.60, len(difference)-1, loc=np.mean(difference), scale=st.sem(difference))
+bins = np.linspace(conf60[0], conf60[1], num=100)
+# or bins = np.linspace(min(difference), max(difference), num=100)
+plt.hist(difference, bins, histtype='bar', rwidth=0.8)
+plt.xlabel('difference', )
+plt.ylabel('number of companies')
+plt.title('differences (computed - Reuters): all data')
 plt.show()
 
 #######################################################################################################################
