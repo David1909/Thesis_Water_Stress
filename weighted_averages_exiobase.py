@@ -17,32 +17,45 @@ import matplotlib.pyplot as plt
 #############################################################################
 
 #read consumption and withdrawal data
-withdrawals = pd.read_csv('exiobase_withdrawals2.csv', error_bad_lines=False, encoding='ISO-8859-1', delimiter=';', dtype=float)
-consumption = pd.read_csv('exiobase_consumption2.csv', error_bad_lines=False, encoding='ISO-8859-1', dtype=float, delimiter=';')
-#consumption = pd.read_csv('exiobase_consumption.csv', error_bad_lines=False, encoding='ISO-8859-1', dtype=float)
+withdrawals = pd.read_csv('exiobase_F_total_withdrawals.csv', error_bad_lines=False, encoding='ISO-8859-1')
+consumption = pd.read_csv('exiobase_F_total_consumption.csv', error_bad_lines=False, encoding='ISO-8859-1')
+
+withdrawals = withdrawals.drop([0])
+withdrawals.rename(columns=withdrawals.iloc[0], inplace=True)
+withdrawals = withdrawals.drop([1])
+withdrawals = withdrawals.set_index('sector', drop=True)
+withdrawals = withdrawals.astype('float')
+
+
+consumption = consumption.drop([0])
+consumption.rename(columns=consumption.iloc[0], inplace=True)
+consumption = consumption.drop([1])
+consumption = consumption.set_index('sector', drop=True)
+consumption = consumption.astype('float')
 
 #sum water intensities for every country and every sector
 sum_withdrawals = withdrawals.sum(0)
 sum_consumption = consumption.sum(0)
 
 #replace withdrawals if smaller than consumption
-combined_df = sum_withdrawals.copy()
-for i in range(0,len(combined_df)):
-    if sum_consumption.iat[i] > combined_df.iat[i]:
-        combined_df.iat[i] = sum_consumption.iat[i]
+#combined_df = sum_withdrawals.copy()
+#for i in range(0,len(combined_df)):
+#    if sum_consumption.iat[i] > combined_df.iat[i]:
+#        combined_df.iat[i] = sum_consumption.iat[i]
 
 #replace zeros with NaN
+combined_df = sum_consumption + sum_withdrawals
 combined_df = combined_df.replace(0, np.nan)
 
 #create a table with coutry x sector
 # cutting the Series in 48 rows and 163 columns
-index = range(0,48)
+index = range(0,49)
 col_names = list(withdrawals.columns.values)
 col_names = col_names[0:163]
-data = np.array([np.arange(48)]*163).T
+data = np.array([np.arange(49)]*163).T
 new_df = pd.DataFrame(np.nan, index=index, columns=col_names)
 
-for i in range(0,48):
+for i in range(0,49):
     for k in range(0,163):
         new_df.iloc[i,k] = combined_df.iat[k + (163 * i)]
 
@@ -56,12 +69,14 @@ mean_sector_water_intensities = new_df.mean(skipna=True)
 ###########          computing weights for weighted averages    #############
 #############################################################################
 
+A = pd.read_fwf('A.txt')
+
+
 #loading economic data
 #A
 # A shows how much a sector buys from another to create one euro of rev (value purchased / value rev)
 # deleted this comment
-doc = codecs.open('A.txt','rU')
-A = pd.read_csv(doc, sep='\t')
+a = pd.read_csv('A.txt', sep="\t", header=None, low_memory=False)
 A.rename(columns=A.iloc[0,:],inplace=True)
 del A['sector']
 A.drop(A.index[0])
