@@ -1,4 +1,4 @@
-# load packages
+# load packages needed
 import pandas as pd
 import codecs
 import numpy as np
@@ -7,9 +7,9 @@ import shapely
 from shapely.geometry import Point
 import time
 import math
+import scipy.stats as st
 from scipy.stats import spearmanr
 from scipy.stats.stats import pearsonr
-import matplotlib
 import matplotlib.pyplot as plt
 
 #############################################################################
@@ -127,9 +127,8 @@ sec_rev_int = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/Them
 sec_rev_int['Water Risk Sector'] = sec_rev_int['Water Risk Sector'].str.lower()
 sec_rev_int = sec_rev_int.set_index('EXIOBASE Sector')
 sec_rev_int = sec_rev_int.copy().drop(index='Private households with employed persons')
-
 wss_water_intensities = sec_rev_int.groupby(['Water Risk Sector']).apply(lambda x: np.average(x['water intensity (M3/EUR)'], weights=x['revenue (M.EUR)']))
-
+wss_water_intensities = wss_water_intensities /1.13 # transform to dollar with 1.13 exchange rate (average 2017)
 
 #compute range for each sector
 #plotting done in excel
@@ -248,13 +247,14 @@ location_rev['BWS'].isna().sum()/len(location_rev['latitude'])
 
 
 #location_rev = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_rev_fractions.csv', encoding='utf-8')
-#wss_water_intensities= pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8')
+#wss_water_intensities= pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header = None)
 
 wss_water_intensities = wss_water_intensities.set_index([0])
 wss_water_intensities = pd.Series(wss_water_intensities.iloc[:,0])
 water_intensities_dict = wss_water_intensities.to_dict()
-location_rev.columns = map(str.lower, location_rev.columns) # transform index to lower case
 water_intensities_dict = {k.lower(): v for k,v in water_intensities_dict.items()} # transform keys lo lower case
+
+location_rev.columns = map(str.lower, location_rev.columns) # transform index to lower case
 
 #define function
 #calculates water footprint per location
@@ -265,11 +265,14 @@ def compute_water_footprints (water_intensities_dict, location_rev):
         for column in location_rev:
             if key == column:
                water_footprints[column] = location_rev[column] * water_intensities_dict[key]
-    water_footprints.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_location.csv',
-                        encoding='utf-8', index=True)
+
 
 #run function
 compute_water_footprints (water_intensities_dict, location_rev)
+
+#save footprints
+water_footprints.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_location.csv',
+                        encoding='utf-8', index=True)
 
 #sum up water footprint per company
 water_footprints = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_location.csv',
@@ -285,10 +288,44 @@ MSCI_water_footprint_per_isin = MSCI_water_footprint_per_isin.reset_index()
 MSCI_water_footprint_per_isin.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin.csv',
                         encoding='utf-8', index=True)
 
+
+
+
+#######################################################################################################################
+#new approach
+#######################################################################################################################
+
+total_revenue.columns = map(str.lower, total_revenue.columns) # transform index to lower case
+
+
+water_footprints_sectors = total_revenue.copy()
+for key in water_intensities_dict:
+    for column in total_revenue:
+        if key == column:
+            water_footprints_sectors[column] = total_revenue[column] * water_intensities_dict[key]
+
+water_footprints_sectors = water_footprints_sectors.drop(['aggregated security name'], axis = 1).copy()
+water_footprints_sectors = water_footprints_sectors.iloc[0:].sum(1)
+
+#MSCI_water_footprint_per_isin.index = MSCI_water_footprint_per_isin.index.get_level_values('isin')
+#save
+water_footprints_sectors.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_2.csv',
+                        encoding='utf-8', index=True)
+
+
+
+
+
+
+
+
+
+
+
 #########################################DISKUSSION######################################################################
 #calculate spearman rank correlation
 MSCI_water_footprint_per_isin = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin.csv',
-                         encoding='utf-8')
+                         encoding='utf-8', header = None)
 reuters_water_footprint = pd.read_csv('C:/Users/bod\Dropbox/1_Masterarbeit Carbon Delta/Themenfindung/Data/Water_Footprints/201808_HAP_WaterFootprints_MSCI_World.csv',
                          encoding='utf-8')
 
@@ -297,7 +334,7 @@ reuters_water_footprint = reuters_water_footprint.drop(['Name'], axis=1)
 reuters_water_footprint = reuters_water_footprint.set_index('Enterprise ISIN')
 reuters_dict = reuters_water_footprint.to_dict()
 #map reuters footprint to calculated values
-MSCI_water_footprint_per_isin['reuters footprints'] = MSCI_water_footprint_per_isin['isin'].map(reuters_dict['WaterWithdrawalTotal (cubic meters)'])
+MSCI_water_footprint_per_isin['reuters footprints'] = MSCI_water_footprint_per_isin[1].map(reuters_dict['WaterWithdrawalTotal (cubic meters)'])
 
 ###################
 #drop rows where Reuters has not reported data
@@ -315,7 +352,7 @@ pearsonr(MSCI_water_footprint_per_isin.iloc[:,2], MSCI_water_footprint_per_isin[
 stddev = math.sqrt(sum((MSCI_water_footprint_per_isin.iloc[:,2] - MSCI_water_footprint_per_isin['reuters footprints'])**2)/len(MSCI_water_footprint_per_isin))
 
 #Histogram
-MSCI_water_footprint_per_isin['difference'] = MSCI_water_footprint_per_isin.iloc[:,2] - MSCI_water_footprint_per_isin['reuters footprints']
+#absolute difference
 difference = MSCI_water_footprint_per_isin['difference'].tolist()
 conf60 = st.t.interval(0.60, len(difference)-1, loc=np.mean(difference), scale=st.sem(difference))
 bins = np.linspace(conf60[0], conf60[1], num=100)
@@ -326,8 +363,25 @@ plt.ylabel('number of companies')
 plt.title('differences (computed - Reuters): all data')
 plt.show()
 
-#######################################################################################################################
-#manipulated daata with hydro = 1000m3/EUR
+#relative differnece
+playing_with_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/Themenfindung/Data/Water intensities/playing_with_intensities.csv',
+                         encoding='utf-8')
+rel_difference = playing_with_intensities['Reuters / sum calculated'].tolist()
+bins = np.linspace(0, 2, num=30)
+font = {'family' : 'normal',
+        'weight' : 'normal',
+        'size'   : 20}
+plt.rc('font', **font)
+plt.hist(rel_difference, bins, histtype='bar', rwidth=0.8)
+plt.xlabel(' relative difference (Reuters/computed)')
+plt.ylabel('number of companies')
+plt.title('Reuters/computed')
+plt.show()
+
+
+
+#looking on specific companies
+neg_dif = total_revenue.loc[total_revenue['ISIN'].isin(['US30161N1019', 'FR0010242511', 'US26441C2044', 'US25746U1097'])]
 
 
 
