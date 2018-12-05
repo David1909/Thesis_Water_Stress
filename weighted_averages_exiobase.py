@@ -76,7 +76,7 @@ A = pd.read_fwf('A.txt')
 #A
 # A shows how much a sector buys from another to create one euro of rev (value purchased / value rev)
 # deleted this comment
-a = pd.read_csv('A.txt', sep="\t", header=None, low_memory=False)
+a = pd.read_csv('A.txt', sep="\t", header=None, dtype=float, error_bad_lines=False, low_memory=False)
 A.rename(columns=A.iloc[0,:],inplace=True)
 del A['sector']
 A.drop(A.index[0])
@@ -87,12 +87,14 @@ sumA = A.iloc[:,1:].sum().reset_index()
 
 #F
 #
-doc = codecs.open('F.txt','rU')
-F = pd.read_csv(doc, sep='\t')
-F.rename(columns=F.iloc[0,:],inplace=True)
+F = pd.read_csv('F.txt', sep="\t", header=None, low_memory=False)
+F = F.drop([0])
+F.rename(columns=F.iloc[0], inplace=True)
+F = F.drop([1])
+F.reset_index(inplace=True, drop=True)
 
 #extracting added value (AV) from table F
-AV = F.iloc[1:10,:]
+AV = F.iloc[0:8,:]
 del AV['sector']
 AV=AV.astype(float)
 AV = AV.sum().reset_index() # results in a 7987 rows df (49 countries x 163 industries)
