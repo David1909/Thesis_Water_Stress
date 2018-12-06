@@ -48,16 +48,13 @@ combined_df = sum_consumption + sum_withdrawals
 combined_df = combined_df.replace(0, np.nan)
 
 #create a table with coutry x sector
-# cutting the Series in 48 rows and 163 columns
-index = range(0,49)
-col_names = list(withdrawals.columns.values)
-col_names = col_names[0:163]
-data = np.array([np.arange(49)]*163).T
-new_df = pd.DataFrame(np.nan, index=index, columns=col_names)
+# cutting the Series in 49 rows and 163 columns
+water_use = pd.DataFrame(np.nan, index=range(0,163), columns=range(0,49))
+water_use.index = combined_df.index[0:163]
 
 for i in range(0,49):
     for k in range(0,163):
-        new_df.iloc[i,k] = combined_df.iat[k + (163 * i)]
+        water_use.iloc[k,i] = combined_df.iat[k + (163 * i)]
 
 #calculate sectoral water intensities by taking the median or mean for every sector
 median_sector_water_intensities = new_df.median(skipna=True)
@@ -76,14 +73,8 @@ A = pd.read_fwf('A.txt')
 #A
 # A shows how much a sector buys from another to create one euro of rev (value purchased / value rev)
 # deleted this comment
-a = pd.read_csv('A.txt', sep="\t", header=None, dtype=float, error_bad_lines=False, low_memory=False)
-A.rename(columns=A.iloc[0,:],inplace=True)
-del A['sector']
-A.drop(A.index[0])
-A = A.iloc[2:,0:]
-A = A.reset_index(drop=True)
-A.iloc[:,1:] = A.iloc[:,1:].astype(float)
-sumA = A.iloc[:,1:].sum().reset_index()
+sumA = pd.read_csv('sumA.csv', sep="\t", error_bad_lines=False, encoding='ISO-8859-1', header=1, index_col=0)
+sumA = sumA.T #transpose
 
 #F
 #
@@ -98,20 +89,21 @@ AV = F.iloc[0:8,:]
 del AV['sector']
 AV=AV.astype(float)
 AV = AV.sum().reset_index() # results in a 7987 rows df (49 countries x 163 industries)
+AV = AV.set_index('index', drop=True)
 
 #calculating Total revenue per sector
 
-rev = sumA.copy().reset_index(drop=True)
+rev = sumA.copy()
 #Create table
 rev_matrix = pd.DataFrame(np.nan, index=range(0,163), columns=range(0,49))
-rev_matrix.iloc[:,0] = rev.iloc[:,0]
+rev_matrix.index = rev.index[0:163]
 
 
 #fill table with values
 # revenue = AV /(1-A)
-for i in range (0,48):
+for i in range (0,49):
     for k in range (0,163):
-        rev_matrix.iloc[k,i+1] = AV.iloc[k+(163*i),1] / (1-sumA.iloc[k+(163*i),1])
+        rev_matrix.iloc[k,i] = AV.iloc[k+(163*i),0] / (1-sumA.iloc[k+(163*i),0])
 
 #exclude zero values
 rev_matrix = rev_matrix.replace(0, np.nan)
@@ -125,9 +117,14 @@ rev_mean = rev_matrix.iloc[:,1:].mean(axis = 1, skipna=True)
 rev_median.to_csv('revenue_sectoral_median_exiobase.csv', encoding='utf-8', index=False)
 rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=False)
 
+
 #############################################################################
 ###########          combine revenue and water intensities    ###############
 #############################################################################
+
+
+ex_3_water_int = water_use / rev_matrix
+ex_3_water_int = ex_3_water_int.median(axis = 1, skipna=True)
 
 rev_and_int = pd.DataFrame(data=median_sector_water_intensities)
 rev_and_int = rev_and_int.assign(revenue=rev_median.values)
@@ -159,34 +156,6 @@ wss_range.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/WSS_R
 #safe
 wss_water_intensities.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', index=True)
 
-
-
-##################################################################
-#write subroutine to create damage function
-#first step: function to match the intensity with a maximum exposure value
-#second step
-######################################################
-
-#max_exposure is the table generated from the water intensities
-max_exposure = wss_water_intensities.copy()
-#for a linear relation between maximum exposure and intensity
-for i in range(0,wss_water_intensities.shape[0]):
-    max_exposure[i] = wss_water_intensities[i] / max(wss_water_intensities)
-
-
-# s-shape funktion to calculate exposure factor
-#copied from Sam
-#Vhalf is the the point of the function where half of the damage possible is caused (Wendepunkt) here between 0.4 and 1.0 -> 0.7
-#vThreshold is the threshold below which no damage ocuurs (here from 0.4 on)
-#once wri exceeds vThreshold, vTemp gets positive
-#what is scale?
-
-def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
-    vTemp = ((wri - vThreshold) / (vHalf - vThreshold))
-    if vTemp < 0: # is that effective?
-        vTemp = 0
-    exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
-    return exp
 
 #############################################################################
 ###########         merge location data and revenue                   #######
@@ -264,7 +233,7 @@ location_rev['BWS'].isna().sum()/len(location_rev['latitude'])
 
 
 #location_rev = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_rev_fractions.csv', encoding='utf-8')
-#wss_water_intensities= pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header = None)
+wss_water_intensities= pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header = None)
 
 wss_water_intensities = wss_water_intensities.set_index([0])
 wss_water_intensities = pd.Series(wss_water_intensities.iloc[:,0])
@@ -328,10 +297,6 @@ water_footprints_sectors = water_footprints_sectors.iloc[0:].sum(1)
 #save
 water_footprints_sectors.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_2.csv',
                         encoding='utf-8', index=True)
-
-
-
-
 
 
 
@@ -461,21 +426,6 @@ MSCI_locations.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 #check time of a process############################################################################################
 start = time.time()
 long = company_data.loc[10, 'longitude']
@@ -517,8 +467,33 @@ end = time.time()
 print(end - start)
 
 
+#############################################################################
+###########                     Water VaRs                     ##############
+#############################################################################
+
+#get water intensiteis
+wss_water_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header=None)
 
 
+#max_exposure is the table generated from the water intensities
+max_exposure = wss_water_intensities.copy()
+
+#for a linear relation between maximum exposure and intensity
+for i in range(0,wss_water_intensities.shape[0]):
+    max_exposure[i] = wss_water_intensities[i] / max(wss_water_intensities)
 
 
+# s-shape funktion to calculate exposure factor
+#copied from Sam
+#Vhalf is the the point of the function where half of the damage possible is caused (Wendepunkt) here between 0.4 and 1.0 -> 0.7
+#vThreshold is the threshold below which no damage ocuurs (here from 0.4 on)
+#once wri exceeds vThreshold, vTemp gets positive
+#what is scale?
+
+def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
+    vTemp = ((wri - vThreshold) / (vHalf - vThreshold))
+    if vTemp < 0: # is that effective?
+        vTemp = 0
+    exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
+    return exp
 #a simple division by the total number of all locations isnt possiblie since
