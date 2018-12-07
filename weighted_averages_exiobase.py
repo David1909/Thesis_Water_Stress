@@ -426,61 +426,25 @@ MSCI_locations.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/
 
 
 
-#check time of a process############################################################################################
-start = time.time()
-long = company_data.loc[10, 'longitude']
-lat = company_data.loc[10, 'latitude']
-point = shapely.geometry.Point(long, lat)
-point = ogr.CreateGeometryFromWkt(str(point))
-for feature in layer:
-    if feature.GetGeometryRef().Contains(point):
-        BWS = feature.GetField("BWS")
-        print(feature.GetField("BWS"))
-        break
-layer.ResetReading()
-
-end = time.time()
-print(end - start)
-####################################################################################################################
-
-
-start = time.time()
-long = MSCI_locations.loc[10, 'longitude']
-lat = MSCI_locations.loc[10, 'latitude']
-point = shapely.geometry.Point(long, lat)
-point = ogr.CreateGeometryFromWkt(str(point))
-for feature in layer:
-    if feature.GetGeometryRef().Contains(point):
-        MSCI_locations.loc[10, 'BWS 2020'] = feature.GetField("ws2028tr")
-        MSCI_locations.loc[10, 'BWS 2030'] = feature.GetField("ws3028tr")
-        MSCI_locations.loc[10, 'BWS 2040'] = feature.GetField("ws4028tr")
-        MSCI_locations.loc[10, 'BWS 2020 pes'] = feature.GetField("ws2038tr")
-        MSCI_locations.loc[10, 'BWS 2030 pes'] = feature.GetField("ws3038tr")
-        MSCI_locations.loc[10, 'BWS 2040 pes'] = feature.GetField("ws4038tr")
-        MSCI_locations.loc[10, 'BWS 2020 opt'] = feature.GetField("ws2024tr")
-        MSCI_locations.loc[10, 'BWS 2030 opt'] = feature.GetField("ws3024tr")
-        MSCI_locations.loc[10, 'BWS 2040 opt'] = feature.GetField("ws4024tr")
-        break
-layer.ResetReading()
-
-end = time.time()
-print(end - start)
-
-
 #############################################################################
 ###########                     Water VaRs                     ##############
 #############################################################################
 
 #get water intensiteis
-wss_water_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header=None)
-
-
+wss_water_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header=None, index_col=0)
 #max_exposure is the table generated from the water intensities
 max_exposure = wss_water_intensities.copy()
+max_exposure = pd.Series(max_exposure.iloc[:,0])
+max_exposure = max_exposure.to_dict()
 
 #for a linear relation between maximum exposure and intensity
-for i in range(0,wss_water_intensities.shape[0]):
-    max_exposure[i] = wss_water_intensities[i] / max(wss_water_intensities)
+for i in range(0, len(wss_water_intensities)):
+    max_exposure.iloc[i] = wss_water_intensities.iloc[i] / max(wss_water_intensities[1])
+
+#link it with location revenue data
+MSCI_locations_BWS_Projections = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_BWS_Projections.csv', encoding='utf-8')
+MSCI_locations_BWS_Projections.columns = map(str.lower, MSCI_locations_BWS_Projections.columns)
+damage_per_loc = MSCI_locations_BWS_Projections.drop(['enterprise', 'unnamed: 0', 'aggregated security name'], axis = 1).copy()
 
 
 # s-shape funktion to calculate exposure factor
@@ -490,6 +454,18 @@ for i in range(0,wss_water_intensities.shape[0]):
 #once wri exceeds vThreshold, vTemp gets positive
 #what is scale?
 
+scale=1.0,
+vHalf=0.7
+vThreshold=0.4
+wri=0.5
+for vTemp = ((wri - vThreshold) / (vHalf - vThreshold)):
+    if vTemp < 0: # is that effective?
+        vTemp = 0
+    exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
+    return exp
+
+
+
 def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
     vTemp = ((wri - vThreshold) / (vHalf - vThreshold))
     if vTemp < 0: # is that effective?
@@ -497,3 +473,69 @@ def createImpactFuncEmanuel(scale=1.0, vHalf=0.7, vThreshold=0.4, wri=0):
     exp = scale * vTemp ** 3 / (1 + vTemp ** 3)
     return exp
 #a simple division by the total number of all locations isnt possiblie since
+#try linear approach
+
+def lin_dam_func(max_exp, bws):
+    # if bws > 1:
+    #     bws = 1
+    # if bws < 0.4:
+    #     bws = 0.4
+    #bws = max(min(bws, 1),0.4)
+    #bws = [v  if v<1 else 1 for v in bws]
+    bws = np.array([max(min(v, 1),0.4) for v in bws])
+    m = max_exp / 0.6
+    b = -0.4 * (max_exp/0.6)
+    rel_damage = bws * m + b
+    return rel_damage
+
+for col in damage_per_loc.columns[4:38]:
+    new_name = col+"_rev_exposed"
+    damage_per_loc[new_name] = damage_per_loc[col] * lin_dam_func(max_exp=max_exposure[col], bws=damage_per_loc['bws'])
+
+for key in max_exposure:
+    for column in damage_per_loc:
+        if key == column:
+            damage_per_loc[column] * lin_dam_func(max_exp=max_exposure[column], bws=damage_per_loc.loc['bws'])
+
+
+
+
+
+    # check time of a process############################################################################################
+    start = time.time()
+    long = company_data.loc[10, 'longitude']
+    lat = company_data.loc[10, 'latitude']
+    point = shapely.geometry.Point(long, lat)
+    point = ogr.CreateGeometryFromWkt(str(point))
+    for feature in layer:
+        if feature.GetGeometryRef().Contains(point):
+            BWS = feature.GetField("BWS")
+            print(feature.GetField("BWS"))
+            break
+    layer.ResetReading()
+
+    end = time.time()
+    print(end - start)
+    ####################################################################################################################
+
+    start = time.time()
+    long = MSCI_locations.loc[10, 'longitude']
+    lat = MSCI_locations.loc[10, 'latitude']
+    point = shapely.geometry.Point(long, lat)
+    point = ogr.CreateGeometryFromWkt(str(point))
+    for feature in layer:
+        if feature.GetGeometryRef().Contains(point):
+            MSCI_locations.loc[10, 'BWS 2020'] = feature.GetField("ws2028tr")
+            MSCI_locations.loc[10, 'BWS 2030'] = feature.GetField("ws3028tr")
+            MSCI_locations.loc[10, 'BWS 2040'] = feature.GetField("ws4028tr")
+            MSCI_locations.loc[10, 'BWS 2020 pes'] = feature.GetField("ws2038tr")
+            MSCI_locations.loc[10, 'BWS 2030 pes'] = feature.GetField("ws3038tr")
+            MSCI_locations.loc[10, 'BWS 2040 pes'] = feature.GetField("ws4038tr")
+            MSCI_locations.loc[10, 'BWS 2020 opt'] = feature.GetField("ws2024tr")
+            MSCI_locations.loc[10, 'BWS 2030 opt'] = feature.GetField("ws3024tr")
+            MSCI_locations.loc[10, 'BWS 2040 opt'] = feature.GetField("ws4024tr")
+            break
+    layer.ResetReading()
+
+    end = time.time()
+    print(end - start)
