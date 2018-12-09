@@ -433,13 +433,14 @@ MSCI_locations.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/
 #get water intensiteis
 wss_water_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header=None, index_col=0)
 #max_exposure is the table generated from the water intensities
+wss_water_intensities.loc['hydro power'] = wss_water_intensities.loc['crop farming'] # set hydro to same intensity as crop farming to get 100 percent exposure
 max_exposure = wss_water_intensities.copy()
 max_exposure = pd.Series(max_exposure.iloc[:,0])
-
 
 #for a linear relation between maximum exposure and intensity
 for i in range(0, len(wss_water_intensities)):
     max_exposure.iloc[i] = wss_water_intensities.iloc[i,0] / max(wss_water_intensities[1])
+del wss_water_intensities
 
 #make a dict for max exposure
 max_exposure = max_exposure.to_dict()
@@ -448,7 +449,7 @@ max_exposure = max_exposure.to_dict()
 MSCI_locations_BWS_Projections = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_BWS_Projections.csv', encoding='utf-8')
 MSCI_locations_BWS_Projections.columns = map(str.lower, MSCI_locations_BWS_Projections.columns)
 damage_per_loc = MSCI_locations_BWS_Projections.drop(['enterprise', 'unnamed: 0', 'aggregated security name'], axis = 1).copy()
-
+del MSCI_locations_BWS_Projections
 
 #try linear approach
 
@@ -465,16 +466,18 @@ def lin_dam_func(max_exp, bws):
     rel_damage = bws * m + b
     return rel_damage
 
-#compute VaR for every location with linear damage function für current BWS
-for col in damage_per_loc.columns[4:38]:
-    new_name = col+"_rev_exposed_cur"
-    damage_per_loc[new_name] = damage_per_loc[col] * lin_dam_func(max_exp=max_exposure[col], bws=damage_per_loc['bws'])
+
 
 #####################Projections##################################
 
 #################################################################
 #################### BUSINESS AS USUAL SCENARIO #################
 #################################################################
+
+#compute VaR for every location with linear damage function für current BWS
+for col in damage_per_loc.columns[4:38]:
+    new_name = col+"_rev_exposed_cur"
+    damage_per_loc[new_name] = damage_per_loc[col] * lin_dam_func(max_exp=max_exposure[col], bws=damage_per_loc['bws'])
 
 #Business as usual 2020, linear damage funciton
 for col in damage_per_loc.columns[4:38]:
@@ -492,13 +495,31 @@ for col in damage_per_loc.columns[4:38]:
     damage_per_loc[new_name] = damage_per_loc[col] * lin_dam_func(max_exp=max_exposure[col], bws=damage_per_loc['bws 2040'])
 
 damage_per_loc_bau = damage_per_loc.copy()
-damage_per_loc_bau.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_damage_per_loc_bau.csv', encoding='utf-8', index=True)
 del damage_per_loc
+damage_per_loc_bau.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_damage_per_loc_bau.csv', encoding='utf-8', index=True)
+
+#sum var per location
+damage_per_loc_bau['var_cur'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_cur':'wind power_rev_exposed_cur'].sum(1)
+damage_per_loc_bau['var_20'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_pes20':'wind power_rev_exposed_pes20'].sum(1)
+damage_per_loc_bau['var_30'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_pes30':'wind power_rev_exposed_pes30'].sum(1)
+damage_per_loc_bau['var_40'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_pes40':'wind power_rev_exposed_pes40'].sum(1)
+
+#delete sectordata and only leave sums per location
+damage_per_loc_pes['revenue']=damage_per_loc_pes.loc[:,'bio power':'wind power'].sum(1) #calculate revenue per loc
+
+#sum for all locations
+var_per_isin_pes = damage_per_loc_pes[['name', 'isin', 'var_cur', 'var_20', 'var_30','var_40', 'revenue']].copy()
+var_per_isin_pes = var_per_isin_pes.groupby(['name', 'isin']).sum()
+var_per_isin_pes.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_pes.csv', encoding='utf-8', index=True)
+
+del damage_per_loc_pes
+
 
 #################################################################
 #################### PESSIMISTIC SCENARIO #######################
 #################################################################
 
+#current as basis
 for col in damage_per_loc.columns[4:38]:
     new_name = col+"_rev_exposed_cur"
     damage_per_loc[new_name] = damage_per_loc[col] * lin_dam_func(max_exp=max_exposure[col], bws=damage_per_loc['bws'])
@@ -533,9 +554,12 @@ damage_per_loc_pes['revenue']=damage_per_loc_pes.loc[:,'bio power':'wind power']
 #sum for all locations
 var_per_isin_pes = damage_per_loc_pes[['name', 'isin', 'var_cur', 'var_20', 'var_30','var_40', 'revenue']].copy()
 var_per_isin_pes = var_per_isin_pes.groupby(['name', 'isin']).sum()
-var_per_isin_pes.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_opt.csv', encoding='utf-8', index=True)
+var_per_isin_pes.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_pes.csv', encoding='utf-8', index=True)
 
 del damage_per_loc_pes
+
+
+
 
 #################################################################
 #################### OPTIMISTIC SCENARIO ########################
