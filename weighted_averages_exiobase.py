@@ -500,17 +500,17 @@ damage_per_loc_bau.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/resu
 
 #sum var per location
 damage_per_loc_bau['var_cur'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_cur':'wind power_rev_exposed_cur'].sum(1)
-damage_per_loc_bau['var_20'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_pes20':'wind power_rev_exposed_pes20'].sum(1)
-damage_per_loc_bau['var_30'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_pes30':'wind power_rev_exposed_pes30'].sum(1)
-damage_per_loc_bau['var_40'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_pes40':'wind power_rev_exposed_pes40'].sum(1)
+damage_per_loc_bau['var_20'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_bau20':'wind power_rev_exposed_bau20'].sum(1)
+damage_per_loc_bau['var_30'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_bau30':'wind power_rev_exposed_bau30'].sum(1)
+damage_per_loc_bau['var_40'] = damage_per_loc_bau.loc[:,'bio power_rev_exposed_bau40':'wind power_rev_exposed_bau40'].sum(1)
 
 #delete sectordata and only leave sums per location
-damage_per_loc_pes['revenue']=damage_per_loc_pes.loc[:,'bio power':'wind power'].sum(1) #calculate revenue per loc
+damage_per_loc_bau['revenue']=damage_per_loc_bau.loc[:,'bio power':'wind power'].sum(1) #calculate revenue per loc
 
 #sum for all locations
-var_per_isin_pes = damage_per_loc_pes[['name', 'isin', 'var_cur', 'var_20', 'var_30','var_40', 'revenue']].copy()
-var_per_isin_pes = var_per_isin_pes.groupby(['name', 'isin']).sum()
-var_per_isin_pes.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_pes.csv', encoding='utf-8', index=True)
+var_per_isin_bau = damage_per_loc_bau[['name', 'isin', 'var_cur', 'var_20', 'var_30','var_40', 'revenue']].copy()
+var_per_isin_bau = var_per_isin_bau.groupby(['name', 'isin']).sum()
+var_per_isin_bau.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_bau.csv', encoding='utf-8', index=True)
 
 del damage_per_loc_pes
 
@@ -585,7 +585,7 @@ for col in damage_per_loc.columns[4:38]:
 
 damage_per_loc_opt = damage_per_loc.copy()
 damage_per_loc_opt.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_damage_per_loc_opt.csv', encoding='utf-8', index=True)
-del damage_per_loc_opt
+del damage_per_loc
 
 #sum var per location
 damage_per_loc_opt['var_cur'] = damage_per_loc_opt.loc[:,'bio power_rev_exposed_cur':'wind power_rev_exposed_cur'].sum(1)
