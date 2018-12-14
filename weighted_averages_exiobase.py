@@ -5,7 +5,6 @@ from osgeo import ogr
 import shapely
 from shapely.geometry import Point
 import time
-import math
 import scipy.stats as st
 from scipy.stats import spearmanr
 from scipy.stats.stats import pearsonr
@@ -155,11 +154,6 @@ wss_range['range'] = sec_rev_int.groupby('Water Risk Sector')['water intensity (
 wss_range['minimun'] = sec_rev_int.groupby('Water Risk Sector').min()['water intensity (M3/EUR)']
 wss_range.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/WSS_Range.csv', encoding='utf-8', index=True)
 
-#
-
-
-
-
 
 #############################################################################
 ###########          WATER FOOTPRINTS                          ##############
@@ -211,7 +205,6 @@ MSCI_water_footprint_per_isin.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon
 
 
 
-
 #######################################################################################################################
 #           directly calculate footprints per isin
 #######################################################################################################################
@@ -241,6 +234,103 @@ water_footprints_total = water_footprints_total[(water_footprints_total[['total 
 water_footprints_total.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_total.csv',
                         encoding='utf-8', index=False)
 
+########################################RESULTS FOOTPRINTS##############################################################
+water_footprints_sectors = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_and_sector.csv',
+                        encoding='utf-8',)
+
+#AB InBev
+inbev_rev = total_revenue.loc[total_revenue['ISIN'].isin(['BE0974293251'])]
+inbev_rev = inbev_rev.drop(['ISIN', 'Name', 'Aggregated Security name'], axis = 1)
+inbev_rev= inbev_rev.dropna(axis=1)
+
+inbev_footprint = water_footprints_sectors.loc[water_footprints_sectors['isin'].isin(['BE0974293251'])]
+inbev_footprint = inbev_footprint.drop(['isin', 'name'], axis = 1)
+inbev_footprint= inbev_footprint.dropna(axis=1)
+
+#revenue pie chart InBev
+labels_inbev_rev = list(inbev_rev.columns.values)
+labels_inbev_rev = ['food processing (60.00%)', 'office (10.00%)', 'retail (30.00%)']
+labels_inbev_rev = [x.lower() for x in labels_inbev_rev]
+fracs_inbev_rev = list(inbev_rev.iloc[0])
+colors_inbev = ['#BDB76B', '#CD5C5C', '#5F9EA0']
+
+#footprint pie chart InBev
+labels_inbev_footprint = list(inbev_footprint.columns.values)
+labels_inbev_footprint = ['food processing (98.82%)', 'office (0.33%)', 'retail (0.85%)']
+fracs_inbev_footprint = list(inbev_footprint.iloc[0])
+
+fig, axs = plt.subplots(1, 2)
+axs[0].pie(fracs_inbev_rev, colors=colors_inbev, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[0].legend(labels_inbev_rev, loc=3, fontsize=18)
+axs[1].pie(fracs_inbev_footprint, colors=colors_inbev, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[1].legend(labels_inbev_footprint, loc=3, fontsize=18)
+axs[0].set_title('assigned revenue', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+axs[1].set_title('computed footprint', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+props = dict(boxstyle='round', facecolor='#FFFFF0', alpha=0.5)
+plt.text(0.5, 0.5, 'total yearly footprint (computed): 190,514,567 m3', fontsize=18, horizontalalignment='right',verticalalignment='bottom', bbox=props)
+
+
+#BAYER
+bayer_rev = total_revenue.loc[total_revenue['ISIN'].isin(['DE000BAY0017'])]
+bayer_rev = bayer_rev.drop(['ISIN', 'Name', 'Aggregated Security name'], axis = 1)
+bayer_rev= bayer_rev.dropna(axis=1)
+
+bayer_footprint = water_footprints_sectors.loc[water_footprints_sectors['isin'].isin(['DE000BAY0017'])]
+bayer_footprint = bayer_footprint.drop(['isin', 'name'], axis = 1)
+bayer_footprint= bayer_footprint.dropna(axis=1)
+
+#revenue pie chart Bayer
+labels_bayer_rev = list(bayer_rev.columns.values)
+labels_bayer_rev = ['chemicals manufacture (28.49%)', 'office (62.53%)', 'other agriculture (2.22%)', 'other manufacture (6.75%)']
+labels_bayer_rev = [x.lower() for x in labels_bayer_rev]
+fracs_bayer_rev = list(bayer_rev.iloc[0])
+colors_bayer = ['#DAA520', '#CD5C5C', '#6B8E23', '#C0C0C0']
+
+#footprint pie chart Bayer
+labels_bayer_footprint = list(bayer_footprint.columns.values)
+labels_bayer_footprint = ['chemicals manufacture (88.60%)', 'office (2.37%)', 'other agriculture (3.10%)', 'other manufacture (5.92%)']
+fracs_bayer_footprint = list(bayer_footprint.iloc[0])
+
+fig, axs = plt.subplots(1, 2)
+axs[0].pie(fracs_bayer_rev, colors=colors_bayer, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[0].legend(labels_bayer_rev, loc=3, fontsize=18)
+axs[1].pie(fracs_bayer_footprint, colors=colors_bayer, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[1].legend(labels_bayer_footprint, loc=3, fontsize=18)
+axs[0].set_title('assigned revenue', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+axs[1].set_title('computed footprint', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+props = dict(boxstyle='round', facecolor='#FFFFF0', alpha=0.5)
+plt.text(0.5, 0.5, 'total yearly footprint (computed): 118,834,453 m3', fontsize=18, horizontalalignment='right',verticalalignment='bottom', bbox=props)
+
+
+#show shares of contribution to a global water footprint
+water_footprints_sectors = water_footprints_sectors.drop(['isin', 'name'], axis = 1)
+global_footprint = water_footprints_sectors.sum()
+global_footprint = global_footprint.sort_values()
+global_footprint['others (24)'] = global_footprint[0:23].sum()
+global_footprint = global_footprint[24:]
+
+labels_global = list(global_footprint.index.values)
+labels_global = ['other manufacture (1.43%)', 'metal manufacture(1.56%)', 'fertilizer (1.57%)', 'food processing (2.02%)', 'manufacture of machinery (2.27%)', 'chemicals manufacture (3.47%)', 'natural gas power (5.56%)', 'coal power (8.76%)', 'crop farming (23.88%)', 'nuclear power (45.31%)', 'others (24 sectors) (4.17%)']
+fracs_global = list(global_footprint)
+colors_global = ['#C0C0C0', '#FF8C00', '#20B2AA', '#BDB76B', '#778899', '#DAA520', '#DCDCDC', 'brown', '#2E8B57', 'yellowgreen', '#FFEBCD']
+
+pie = plt.pie(fracs_global, pctdistance=0.8, colors=colors_global)
+plt.legend(pie[0], labels=labels_global, bbox_to_anchor=(1, 0, 0.5, 1), loc="center left", fontsize=14)
+plt.title('shares for MSCI water footprints', fontsize=20, fontweight= 'bold')
+plt.subplots_adjust(left=0.0, bottom=0.1, right=0.45)
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 #########################################DISKUSSION######################################################################
@@ -258,7 +348,7 @@ reuters_dict = reuters_water_footprint.to_dict()
 water_footprints_total['reuters footprints'] = water_footprints_total['isin'].map(reuters_dict['WaterWithdrawalTotal (cubic meters)'])
 
 ###################
-#drop rows where Reuters has not reported data
+#drop rows where Reuters has no reported data
 water_footprints_total = water_footprints_total.dropna(subset=['reuters footprints'])
 water_footprints_total = water_footprints_total.reset_index(drop=True)
 ##################
@@ -271,45 +361,133 @@ pearsonr(water_footprints_total['total footprint'], water_footprints_total['reut
 
 #standard deviation
 stddev = math.sqrt(sum((water_footprints_total['total footprint'] - water_footprints_total['reuters footprints'])**2)/len(water_footprints_total))
+stddev / water_footprints_total['total footprint'].mean()
 
 #difference
 water_footprints_total['difference'] = water_footprints_total['total footprint'] - water_footprints_total['reuters footprints']
+sum(n < 0 for n in water_footprints_total['difference']) # total number of companies where reuters is larger
+sum(n > 0 for n in water_footprints_total['difference']) # total number of companies where computed is larger
 
-#relative difference
+#difference as share of calculated footprints
 water_footprints_total['rel_difference'] = water_footprints_total['difference'] / water_footprints_total['total footprint']
+water_footprints_total['rel_difference'] = water_footprints_total['rel_difference'].abs() #make all values positive
+
+#sort values
+water_footprints_total = water_footprints_total.sort_values('rel_difference')
+
+#difference form reuters
+water_footprints_total['difference_from_reuters'] =  water_footprints_total['difference'] / water_footprints_total['reuters footprints']
+
+#reuters / computed
+water_footprints_total['reuters / computed'] = water_footprints_total['reuters footprints'] / water_footprints_total['total footprint']
+
 
 #Histogram
 #absolute difference
 difference = water_footprints_total['difference'].tolist()
 conf60 = st.t.interval(0.60, len(difference)-1, loc=np.mean(difference), scale=st.sem(difference))
-bins = np.linspace(conf60[0], conf60[1], num=100)
-# or bins = np.linspace(min(difference), max(difference), num=100)
+#bins = np.linspace(conf60[0], conf60[1], num=100)
+bins = np.linspace(min(difference), max(difference), num=100)
 plt.hist(difference, bins, histtype='bar', rwidth=0.8)
-plt.xlabel('difference', )
-plt.ylabel('number of companies')
-plt.title('differences (computed - Reuters): all data')
+plt.xlabel('difference', fontsize=26)
+plt.ylabel('number of companies', fontsize=26)
+plt.title('differences (computed - Reuters): all data', fontsize=28)
 plt.show()
 
 #relative differnece
-playing_with_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/Themenfindung/Data/Water intensities/playing_with_intensities.csv',
-                         encoding='utf-8')
-rel_difference = playing_with_intensities['Reuters / sum calculated'].tolist()
+#playing_with_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/Themenfindung/Data/Water intensities/playing_with_intensities.csv',
+#                         encoding='utf-8')
+
+rel_difference = water_footprints_total['reuters / computed'].tolist()
 bins = np.linspace(0, 2, num=30)
-font = {'family' : 'normal',
-        'weight' : 'normal',
-        'size'   : 20}
-plt.rc('font', **font)
 plt.hist(rel_difference, bins, histtype='bar', rwidth=0.8)
-plt.xlabel(' relative difference (Reuters/computed)')
-plt.ylabel('number of companies')
-plt.title('Reuters/computed')
+plt.xlabel(' relative difference (Reuters/computed)', fontsize=26)
+plt.ylabel('number of companies',fontsize=26)
+plt.title('Reuters/computed', fontsize=28)
+plt.show()
+
+# difference from reuters
+rel_difference = water_footprints_total['difference_from_reuters'].tolist()
+bins = np.linspace(-1, 11, num=31)
+plt.hist(rel_difference, bins, histtype='bar', rwidth=0.8)
+plt.tick_params(labelsize=20, width=0.5)
+plt.xlabel('(calculated - Reuters) / Reuters', fontsize=26)
+plt.ylabel('number of companies',fontsize=26)
+plt.title('Difference from Reuters', fontsize=28)
 plt.show()
 
 
 
-#looking on specific companies
-neg_dif = total_revenue.loc[total_revenue['ISIN'].isin(['US30161N1019', 'FR0010242511', 'US26441C2044', 'US25746U1097'])]
+#extract companies with large differences
+large_differences = water_footprints_total.copy()
+large_differences['difference'] = water_footprints_total['difference'].abs()
+large_differences = large_differences.loc[large_differences['difference'] > 10**10]
+large_differences.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/large_differences.csv',
+                        encoding='utf-8', index=False)
 
+#remove large outliers and check quality measures
+footprints_without_outliers = water_footprints_total[~water_footprints_total['isin'].isin(['DE0007037129', 'FR00102425511', 'IT0003128367', 'MU0117U00026', 'US25746U1097', 'US26441C2044','US30161N1019'])]
+#pearson without outliers
+spearmanr(footprints_without_outliers['total footprint'], footprints_without_outliers['reuters footprints'])
+#spearman without outliers
+pearsonr(footprints_without_outliers['total footprint'], footprints_without_outliers['reuters footprints'])
+
+
+################################################################
+#plot pie chart for RWE
+################################################################
+total_revenue = pd.read_csv('export_rev_water_risk_big.csv', error_bad_lines=False, encoding='ISO-8859-1')
+rwe = total_revenue.loc[total_revenue['ISIN'].isin(['DE0007037129'])].reset_index()
+rwe = rwe.drop(['ISIN', 'Name', 'Aggregated Security name', 'index'], axis = 1)
+rwe = rwe.dropna(axis=1)
+
+labels = list(rwe.columns.values)
+labels = [x.lower() for x in labels]
+fracs = list(rwe.iloc[0])
+colors = ['green', 'brown', '#87CEFA', '#DCDCDC', 'yellowgreen', '#CD5C5C', '#708090', 'gold', 'olive']
+
+#RWE: fracs for rwe are in TWh (Statista)
+rwe_labels = ['coal', 'natural gas', 'nuclear', 'renewables', 'others']
+rwe_fracs = [74.2+29.4,53.9, 30.3, 11.3, 3.1]
+rwe_colors = ['brown', '#DCDCDC', 'yellowgreen', 'green', '#FFEBCD']
+
+
+fig, axs = plt.subplots(1, 2)
+axs[0].pie(fracs, labels=labels, autopct='%0.2f%%', explode=[0,.2,0,0,0,0,0,0,0], colors=colors, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[1].pie(rwe_fracs, labels=rwe_labels, autopct='%0.2f%%', explode=[.1,0,0,0,0], colors=rwe_colors,  textprops=dict(fontsize=18), pctdistance=0.8)
+axs[0].set_title('assigned by model', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+axs[1].set_title('statista', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+
+
+
+###################################################################################
+#plot pie chart for EDF
+############################################################################
+edf = total_revenue.loc[total_revenue['ISIN'].isin(['FR0010242511'])].reset_index()
+edf = edf.drop(['ISIN', 'Name', 'Aggregated Security name', 'index', 'Geothermal Power'], axis = 1)# remove geothermal because its only .003% and not visible in chart
+edf = edf.dropna(axis=1)
+
+labels = list(edf.columns.values)
+labels = [x.lower() for x in labels]
+fracs = list(edf.iloc[0])
+colors = ['green', 'brown', '#87CEFA', '#DCDCDC', 'yellowgreen', '#CD5C5C', '#708090', 'gold', 'olive']
+
+#EDF: fracs for rwe are in TWh (homepage: https://www.edf.fr/mix-energetique)
+edf_labels = ['other renewables', 'coal', 'hydro power', 'natural gas', 'nuclear', 'oil']
+edf_fracs = [3,4,7,8,77,1]
+edf_colors = ['green', 'brown', '#87CEFA' , '#DCDCDC', 'yellowgreen', '#FFEBCD']
+
+
+fig, axs = plt.subplots(1, 2)
+axs[0].pie(fracs, labels=labels, autopct='%0.2f%%', explode=[0,0,0,0,0.2,0,0,0,0], colors=colors, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[1].pie(edf_fracs, labels=edf_labels, autopct='%0.2f%%', explode=[0,0,0,0,0.2,0], colors=edf_colors, textprops=dict(fontsize=18), pctdistance=0.8)
+axs[0].set_title('assigned by model', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+axs[1].set_title('EDF homepage', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
+
+
+
+# looking on specific companies
+neg_dif = total_revenue.loc[total_revenue['ISIN'].isin(['US30161N1019', 'FR0010242511', 'US26441C2044', 'US25746U1097'])]
 
 
 
@@ -381,8 +559,6 @@ company_data1.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/M
 
 #check the percentage of outliers (nan values)
 location_rev['BWS'].isna().sum()/len(location_rev['latitude'])
-#error is at 0.04949630816782096
-#GetField gets the data of a column. Here 9 is for BWS
 
 
 
