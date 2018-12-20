@@ -697,7 +697,7 @@ def lin_dam_func(max_exp, bws):
     #     bws = 0.4
     #bws = max(min(bws, 1),0.4)
     #bws = [v  if v<1 else 1 for v in bws]
-    bws = np.array([max(min(v, 1),0.4) for v in bws])
+    bws = np.array([max(min(v, 1),0.4) for v in bws]) #conditions in comprehension
     m = max_exp / 0.6
     b = -0.4 * (max_exp/0.6)
     rel_damage = bws * m + b
@@ -837,6 +837,30 @@ damage_per_loc_opt['revenue']=damage_per_loc_opt.loc[:,'bio power':'wind power']
 var_per_isin_opt = damage_per_loc_opt[['name', 'isin', 'var_cur', 'var_20', 'var_30','var_40', 'revenue']].copy()
 var_per_isin_opt = var_per_isin_opt.groupby(['name', 'isin']).sum()
 var_per_isin_opt.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_opt.csv', encoding='utf-8', index=True)
+
+
+#####################################discussion and results VaR#########################################################
+
+#plot shares of VaRs
+damage_per_loc_bau = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_damage_per_loc_bau.csv', encoding='ISO-8859-1', index_col=0)
+var_per_isin_sectors_bau = damage_per_loc_bau.iloc[:,49:83] #select current scenario
+var_per_isin_sectors_bau = var_per_isin_sectors_bau.sum()
+
+var_per_isin_sectors_bau = var_per_isin_sectors_bau.sort_values()
+var_per_isin_sectors_bau['others (24)'] = var_per_isin_sectors_bau[0:23].sum()
+var_per_isin_sectors_bau = var_per_isin_sectors_bau[24:]
+
+labels_global = list(var_per_isin_sectors_bau.index.values)
+labels_global = ['metal manufacture (1.32%)', 'other manufacture (1.36%)', 'food processing (1.86%)', 'manufacture of machinery (2.12%)', 'chemicals manufacture (2.77%)', 'natural gas power (3.57%)', 'coal power (5.12%)', 'hydro power (21.28%)', 'nuclear power (24.37%)', 'crop farming (32.06%)', 'others (24 sectors) (4.17%)']
+fracs_global = list(var_per_isin_sectors_bau)
+colors_global = ['#FF8C00', '#C0C0C0', '#BDB76B', '#778899', '#DAA520', '#DCDCDC', 'brown', '#87CEFA', 'yellowgreen', '#2E8B57', '#FFEBCD']
+
+pie = plt.pie(fracs_global, pctdistance=0.8, colors=colors_global)
+plt.legend(pie[0], labels=labels_global, bbox_to_anchor=(1, 0, 0.5, 1), loc="center left", fontsize=14)
+plt.title('shares in summed VaR (current conditions)', fontsize=20, fontweight= 'bold')
+plt.subplots_adjust(left=0.0, bottom=0.1, right=0.45)
+
+
 
 ########################################
 
