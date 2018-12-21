@@ -1,3 +1,9 @@
+#################################
+#Editor:        David Bokern    #
+#Last Update:   21.12.2018      #
+#################################
+
+
 # load packages needed
 import pandas as pd
 import numpy as np
@@ -11,9 +17,9 @@ from scipy.stats.stats import pearsonr
 import math
 import matplotlib.pyplot as plt
 
-#############################################################################
-###########          computing average water intensities        #############
-#############################################################################
+########################################################################################################################
+###########          computing average water intensities        ########################################################
+########################################################################################################################
 
 #read consumption and withdrawal data
 withdrawals = pd.read_csv('exiobase_F_total_withdrawals.csv', error_bad_lines=False, encoding='ISO-8859-1')
@@ -61,9 +67,9 @@ mean_sector_water_intensities = new_df.mean(skipna=True)
 
 
 
-#############################################################################
-###########          computing weights for weighted averages    #############
-#############################################################################
+########################################################################################################################
+###########          computing weights for weighted averages    ########################################################
+########################################################################################################################
 
 A = pd.read_fwf('A.txt')
 
@@ -117,9 +123,9 @@ rev_median.to_csv('revenue_sectoral_median_exiobase.csv', encoding='utf-8', inde
 rev_mean.to_csv('revenue_sectoral_mean_exiobase.csv', encoding='utf-8', index=False)
 
 
-#############################################################################
-###########          combine revenue and water intensities    ###############
-#############################################################################
+########################################################################################################################
+###########          combine revenue and water intensities    ##########################################################
+########################################################################################################################
 
 
 ex_3_water_int = water_use / rev_matrix
@@ -130,11 +136,11 @@ rev_and_int = rev_and_int.assign(revenue=rev_median.values)
 #print csv:
 rev_and_int.to_csv('median_revenue_and_median_intensities_exiobase.csv', encoding='utf-8', index=True)
 
-##################################################################################################
-########      the exiobase sector averages were assigend a Sector by hand in EXCEL      ##########
-########      creation of sector by simalarity of water intensity and Business Model    ##########
-########      the weighted average is calculated using the median revenue of a sector   ##########
-##################################################################################################
+########################################################################################################################
+########      the exiobase sector averages were assigend a Sector by hand in EXCEL      ################################
+########      creation of sector by simalarity of water intensity and Business Model    ################################
+########      the weighted average is calculated using the median revenue of a sector   ################################
+########################################################################################################################
 
 sec_rev_int = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/Themenfindung/Data/Mapping/Mapping_median_revenue_and_median_intensities_exiobase.csv', error_bad_lines=False, encoding='ISO-8859-1')
 sec_rev_int['Water Risk Sector'] = sec_rev_int['Water Risk Sector'].str.lower()
@@ -155,9 +161,12 @@ wss_range['minimun'] = sec_rev_int.groupby('Water Risk Sector').min()['water int
 wss_range.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/WSS_Range.csv', encoding='utf-8', index=True)
 
 
-#############################################################################
-###########          WATER FOOTPRINTS                          ##############
-#############################################################################
+
+
+
+########################################################################################################################
+###########          WATER FOOTPRINTS                          #########################################################
+########################################################################################################################
 
 
 location_rev = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_rev_fractions.csv', encoding='utf-8')
@@ -234,7 +243,13 @@ water_footprints_total = water_footprints_total[(water_footprints_total[['total 
 water_footprints_total.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_total.csv',
                         encoding='utf-8', index=False)
 
-########################################RESULTS FOOTPRINTS##############################################################
+
+
+########################################################################################################################
+####################            RESULTS FOOTPRINTS              ########################################################
+########################################################################################################################
+
+
 water_footprints_sectors = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_and_sector.csv',
                         encoding='utf-8',)
 
@@ -301,7 +316,6 @@ axs[1].set_title('computed footprint', horizontalalignment='center', verticalali
 props = dict(boxstyle='round', facecolor='#FFFFF0', alpha=0.5)
 plt.text(0.5, 0.5, 'total yearly footprint (computed): 118,834,453 m3', fontsize=18, horizontalalignment='right',verticalalignment='bottom', bbox=props)
 
-
 #show shares of contribution to a global water footprint
 water_footprints_sectors = water_footprints_sectors.drop(['isin', 'name'], axis = 1)
 global_footprint = water_footprints_sectors.sum()
@@ -322,18 +336,10 @@ plt.subplots_adjust(left=0.0, bottom=0.1, right=0.45)
 
 
 
+########################################################################################################################
+#######################         DISKUSSION           ###################################################################
+########################################################################################################################
 
-
-
-
-
-
-
-
-
-
-
-#########################################DISKUSSION######################################################################
 #calculate spearman rank correlation
 water_footprints_total = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_water_footprint_per_isin_total.csv',
                          encoding='utf-8')
@@ -416,8 +422,6 @@ plt.ylabel('number of companies',fontsize=26)
 plt.title('Difference from Reuters', fontsize=28)
 plt.show()
 
-
-
 #extract companies with large differences
 large_differences = water_footprints_total.copy()
 large_differences['difference'] = water_footprints_total['difference'].abs()
@@ -436,6 +440,7 @@ pearsonr(footprints_without_outliers['total footprint'], footprints_without_outl
 ################################################################
 #plot pie chart for RWE
 ################################################################
+
 total_revenue = pd.read_csv('export_rev_water_risk_big.csv', error_bad_lines=False, encoding='ISO-8859-1')
 rwe = total_revenue.loc[total_revenue['ISIN'].isin(['DE0007037129'])].reset_index()
 rwe = rwe.drop(['ISIN', 'Name', 'Aggregated Security name', 'index'], axis = 1)
@@ -451,7 +456,6 @@ rwe_labels = ['coal', 'natural gas', 'nuclear', 'renewables', 'others']
 rwe_fracs = [74.2+29.4,53.9, 30.3, 11.3, 3.1]
 rwe_colors = ['brown', '#DCDCDC', 'yellowgreen', 'green', '#FFEBCD']
 
-
 fig, axs = plt.subplots(1, 2)
 axs[0].pie(fracs, labels=labels, autopct='%0.2f%%', explode=[0,.2,0,0,0,0,0,0,0], colors=colors, textprops=dict(fontsize=18), pctdistance=0.8)
 axs[1].pie(rwe_fracs, labels=rwe_labels, autopct='%0.2f%%', explode=[.1,0,0,0,0], colors=rwe_colors,  textprops=dict(fontsize=18), pctdistance=0.8)
@@ -459,10 +463,10 @@ axs[0].set_title('assigned by model', horizontalalignment='center', verticalalig
 axs[1].set_title('statista', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
 
 
-
-###################################################################################
+########################################################################################################################
 #plot pie chart for EDF
-############################################################################
+########################################################################################################################
+
 edf = total_revenue.loc[total_revenue['ISIN'].isin(['FR0010242511'])].reset_index()
 edf = edf.drop(['ISIN', 'Name', 'Aggregated Security name', 'index', 'Geothermal Power'], axis = 1)# remove geothermal because its only .003% and not visible in chart
 edf = edf.dropna(axis=1)
@@ -477,13 +481,11 @@ edf_labels = ['other renewables', 'coal', 'hydro power', 'natural gas', 'nuclear
 edf_fracs = [3,4,7,8,77,1]
 edf_colors = ['green', 'brown', '#87CEFA' , '#DCDCDC', 'yellowgreen', '#FFEBCD']
 
-
 fig, axs = plt.subplots(1, 2)
 axs[0].pie(fracs, labels=labels, autopct='%0.2f%%', explode=[0,0,0,0,0.2,0,0,0,0], colors=colors, textprops=dict(fontsize=18), pctdistance=0.8)
 axs[1].pie(edf_fracs, labels=edf_labels, autopct='%0.2f%%', explode=[0,0,0,0,0.2,0], colors=edf_colors, textprops=dict(fontsize=18), pctdistance=0.8)
 axs[0].set_title('assigned by model', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
 axs[1].set_title('EDF homepage', horizontalalignment='center', verticalalignment='top', pad=50, fontweight= 'bold', fontsize=24)
-
 
 
 # looking on specific companies
@@ -492,11 +494,10 @@ neg_dif = total_revenue.loc[total_revenue['ISIN'].isin(['US30161N1019', 'FR00102
 
 
 
-
-#############################################################################
-###########         merge location data and revenue                   #######
-###########    result: company locations with fraction of revenue     #######
-#############################################################################
+########################################################################################################################
+###########         merge location data and revenue                   ##################################################
+###########    result: company locations with fraction of revenue     ##################################################
+########################################################################################################################
 
 locations = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_BWS.csv', error_bad_lines=False, encoding='ISO-8859-1')
 locations=locations.drop(locations.columns[[5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33]], axis=1).copy()
@@ -525,10 +526,10 @@ location_rev.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MS
 
 
 
-#############################################################################
-###########          writing program to read location data    ##############
-###########                 CURRENT DATA, not projection data  ##############
-#############################################################################
+########################################################################################################################
+###########          writing program to read location data    ##########################################################
+###########                 CURRENT DATA, not projection data  #########################################################
+########################################################################################################################
 
 #load location and sectoral revenue database
 company_data = pd.read_csv('locations_rev_sector_msci.csv', error_bad_lines=False, encoding='ISO-8859-1')
@@ -562,10 +563,10 @@ location_rev['BWS'].isna().sum()/len(location_rev['latitude'])
 
 
 
-#############################################################################
-###########          writing program to read location data     ##############
-###########                 future projections                 ##############
-#############################################################################
+########################################################################################################################
+###########          writing program to read location data     #########################################################
+###########                 future projections                 #########################################################
+########################################################################################################################
 
 #load shapefile with layer BWS (package shapefile)
 sf = ogr.Open("C:/Users/bod/Desktop/aqueduct_projections_20150309_shp/aqueduct_projections_20150309.shp")
@@ -612,11 +613,15 @@ for i in range(0, len(MSCI_locations['latitude'])):
 MSCI_locations.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_locations_BWS_Projections.csv', encoding='utf-8', index=False)
 
 
+########################################################################################################################
+                        ##        ##     ##        #########
+                         ##      ##    ##  ##      ##     ##
+                          ##    ##    ##    ##     #########
+                           ##  ##    ##########    #####
+                             ##     ##        ##   ##  ###
+########################################################################################################################
 
 
-#############################################################################
-###########                     Water VaRs                     ##############
-#############################################################################
 
 #get water intensiteis
 wss_water_intensities = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/Water_Risk_Sectors_intensities.csv', encoding='utf-8', header=None, index_col=0)
@@ -797,7 +802,6 @@ del damage_per_loc_pes
 
 
 
-
 #################################################################
 #################### OPTIMISTIC SCENARIO ########################
 #################################################################
@@ -839,7 +843,9 @@ var_per_isin_opt = var_per_isin_opt.groupby(['name', 'isin']).sum()
 var_per_isin_opt.to_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_var_per_isin_opt.csv', encoding='utf-8', index=True)
 
 
+########################################################################################################################
 #####################################discussion and results VaR#########################################################
+########################################################################################################################
 
 #plot shares of VaRs
 damage_per_loc_bau = pd.read_csv('C:/Users/bod/Dropbox/1_Masterarbeit Carbon Delta/results/MSCI_damage_per_loc_bau.csv', encoding='ISO-8859-1', index_col=0)
@@ -862,7 +868,7 @@ plt.subplots_adjust(left=0.0, bottom=0.1, right=0.45)
 
 
 
-########################################
+######################### Other Notes###################################################################################
 
 
     # s-shape funktion to calculate exposure factor
